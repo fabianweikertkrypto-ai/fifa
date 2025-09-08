@@ -88,7 +88,10 @@ function createSingleEliminationBracket(players) {
                 player1: playersCopy[i],
                 player2: playersCopy[i + 1],
                 winner: null,
-                status: 'pending'
+                score1: null,
+                score2: null,
+                status: 'pending',
+                pendingResults: []
             });
         }
     }
@@ -227,14 +230,19 @@ app.get('/tournament', async (req, res) => {
     }
 });
 
-// Route: Match-Ergebnis eintragen
-app.post('/tournament/match/:matchId/result', async (req, res) => {
+// Route: Match-Ergebnis von Spieler einreichen
+app.post('/tournament/match/:matchId/submit-result', async (req, res) => {
     try {
         const { matchId } = req.params;
-        const { winnerId } = req.body;
+        const { submittedBy, walletAddress, score1, score2 } = req.body;
         
-        if (!winnerId) {
-            return res.status(400).json({ error: 'Gewinner-ID ist erforderlich' });
+        // Validierung
+        if (!submittedBy || !walletAddress || score1 === undefined || score2 === undefined) {
+            return res.status(400).json({ error: 'Alle Felder sind erforderlich' });
+        }
+        
+        if (score1 === score2) {
+            return res.status(400).json({ error: 'Unentschieden sind nicht erlaubt' });
         }
         
         const tournament = await readTournament();
@@ -242,66 +250,160 @@ app.post('/tournament/match/:matchId/result', async (req, res) => {
             return res.status(404).json({ error: 'Turnier nicht gefunden' });
         }
         
-        // Match in aktueller Runde finden
-        const currentRound = tournament.bracket.rounds[tournament.bracket.currentRound - 1];
-        const match = currentRound.find(m => m.id === matchId);
+        // Match finden
+        let targetMatch = null;
+        let roundIndex = -1;
         
-        if (!match) {
+        for (let i = 0; i < tournament.bracket.rounds.length; i++) {
+            const match = tournament.bracket.rounds[i].find(m => m.id === matchId);
+            if (match) {
+                targetMatch = match;
+                roundIndex = i;
+                break;
+            }
+        }
+        
+        if (!targetMatch) {
             return res.status(404).json({ error: 'Match nicht gefunden' });
         }
         
-        if (match.status === 'completed') {
+        if (targetMatch.status === 'completed') {
             return res.status(400).json({ error: 'Match wurde bereits abgeschlossen' });
         }
         
-        // Prüfen ob Gewinner einer der beiden Spieler ist
-        if (winnerId !== match.player1.id && winnerId !== match.player2.id) {
-            return res.status(400).json({ error: 'Ungültige Gewinner-ID' });
+        // Prüfen ob Spieler Teil des Matches ist
+        if (submittedBy !== targetMatch.player1.id && submittedBy !== targetMatch.player2.id) {
+            return res.status(403).json({ error: 'Sie sind nicht Teil dieses Matches' });
         }
         
-        // Match-Ergebnis setzen
-        match.winner = winnerId === match.player1.id ? match.player1 : match.player2;
-        match.status = 'completed';
+        // Initialisiere pendingResults falls nicht vorhanden
+        if (!targetMatch.pendingResults) {
+            targetMatch.pendingResults = [];
+        }
         
-        // Prüfen ob alle Matches der aktuellen Runde abgeschlossen sind
-        const allMatchesCompleted = currentRound.every(m => m.status === 'completed');
+        // Prüfen ob Spieler bereits ein Ergebnis eingereicht hat
+        const existingResult = targetMatch.pendingResults.find(r => r.submittedBy === submittedBy);
+        if (existingResult) {
+            return res.status(400).json({ error: 'Sie haben bereits ein Ergebnis eingereicht' });
+        }
         
-        if (allMatchesCompleted) {
-            // Nächste Runde erstellen oder Turnier beenden
-            const winners = currentRound.map(m => m.winner);
-            const advancingPlayers = [...winners, ...tournament.bracket.playersWithByes];
-            tournament.bracket.playersWithByes = []; // Freilose nur in erster Runde
+        // Ergebnis hinzufügen
+        targetMatch.pendingResults.push({
+            submittedBy,
+            walletAddress,
+            score1: parseInt(score1),
+            score2: parseInt(score2),
+            submittedAt: new Date().toISOString()
+        });
+        
+        // Prüfen ob beide Spieler eingereicht haben
+        if (targetMatch.pendingResults.length === 2) {
+            const result1 = targetMatch.pendingResults[0];
+            const result2 = targetMatch.pendingResults[1];
             
-            if (advancingPlayers.length === 1) {
-                // Turnier beendet
-                tournament.bracket.isComplete = true;
-                tournament.bracket.winner = advancingPlayers[0];
-                tournament.status = 'finished';
+            // Prüfen ob Ergebnisse übereinstimmen
+            if (result1.score1 === result2.score1 && result1.score2 === result2.score2) {
+                // Ergebnisse stimmen überein - Match automatisch abschließen
+                targetMatch.score1 = result1.score1;
+                targetMatch.score2 = result1.score2;
+                targetMatch.winner = result1.score1 > result1.score2 ? targetMatch.player1 : targetMatch.player2;
+                targetMatch.status = 'completed';
+                targetMatch.completedAt = new Date().toISOString();
+                targetMatch.completedBy = 'auto';
                 
-                // Auch in Hauptdatenbank aktualisieren
-                const db = await readDatabase();
-                db.tournamentStatus = 'finished';
-                await writeDatabase(db);
+                console.log(`Match ${matchId} automatisch abgeschlossen: ${targetMatch.score1}:${targetMatch.score2}`);
+                
+                // Prüfen ob Runde abgeschlossen ist und nächste Runde erstellen
+                await checkAndAdvanceRound(tournament, roundIndex);
+                
+                await writeTournament(tournament);
+                
+                return res.json({
+                    message: 'Ergebnis eingereicht und Match automatisch abgeschlossen',
+                    tournament: tournament
+                });
             } else {
-                // Nächste Runde erstellen
-                tournament.bracket.currentRound++;
-                const nextRound = [];
+                // Konflikt markieren
+                targetMatch.pendingResults.forEach(r => r.conflict = true);
                 
-                for (let i = 0; i < advancingPlayers.length; i += 2) {
-                    if (i + 1 < advancingPlayers.length) {
-                        nextRound.push({
-                            id: `match_${Date.now()}_${i/2}_round${tournament.bracket.currentRound}`,
-                            player1: advancingPlayers[i],
-                            player2: advancingPlayers[i + 1],
-                            winner: null,
-                            status: 'pending'
-                        });
-                    }
-                }
+                await writeTournament(tournament);
                 
-                tournament.bracket.rounds.push(nextRound);
+                console.log(`Match ${matchId} hat widersprüchliche Ergebnisse`);
+                
+                return res.json({
+                    message: 'Ergebnis eingereicht - Konflikt erkannt, Admin-Entscheidung erforderlich',
+                    conflict: true
+                });
+            }
+        } else {
+            // Warte auf zweites Ergebnis
+            await writeTournament(tournament);
+            
+            return res.json({
+                message: 'Ergebnis eingereicht - warte auf Gegner',
+                waitingForOpponent: true
+            });
+        }
+        
+    } catch (error) {
+        console.error('Fehler beim Einreichen des Ergebnisses:', error);
+        res.status(500).json({ error: 'Interner Serverfehler' });
+    }
+});
+
+// Route: Match-Ergebnis durch Admin eintragen (überschreibt Konflikte)
+app.post('/tournament/match/:matchId/result', async (req, res) => {
+    try {
+        const { matchId } = req.params;
+        const { winnerId, score1, score2 } = req.body;
+        
+        // Wenn score1 und score2 vorhanden sind, nutze diese
+        // Ansonsten nur winnerId für Rückwärtskompatibilität
+        
+        const tournament = await readTournament();
+        if (!tournament) {
+            return res.status(404).json({ error: 'Turnier nicht gefunden' });
+        }
+        
+        // Match finden
+        let targetMatch = null;
+        let roundIndex = -1;
+        
+        for (let i = 0; i < tournament.bracket.rounds.length; i++) {
+            const match = tournament.bracket.rounds[i].find(m => m.id === matchId);
+            if (match) {
+                targetMatch = match;
+                roundIndex = i;
+                break;
             }
         }
+        
+        if (!targetMatch) {
+            return res.status(404).json({ error: 'Match nicht gefunden' });
+        }
+        
+        // Score setzen falls vorhanden
+        if (score1 !== undefined && score2 !== undefined) {
+            targetMatch.score1 = parseInt(score1);
+            targetMatch.score2 = parseInt(score2);
+            targetMatch.winner = targetMatch.score1 > targetMatch.score2 ? targetMatch.player1 : targetMatch.player2;
+        } else if (winnerId) {
+            // Alte Logik für Rückwärtskompatibilität
+            if (winnerId !== targetMatch.player1.id && winnerId !== targetMatch.player2.id) {
+                return res.status(400).json({ error: 'Ungültige Gewinner-ID' });
+            }
+            targetMatch.winner = winnerId === targetMatch.player1.id ? targetMatch.player1 : targetMatch.player2;
+        } else {
+            return res.status(400).json({ error: 'Gewinner oder Spielstand erforderlich' });
+        }
+        
+        targetMatch.status = 'completed';
+        targetMatch.completedAt = new Date().toISOString();
+        targetMatch.completedBy = 'admin';
+        targetMatch.pendingResults = []; // Lösche ausstehende Ergebnisse
+        
+        // Prüfen ob Runde abgeschlossen ist und nächste Runde erstellen
+        await checkAndAdvanceRound(tournament, roundIndex);
         
         await writeTournament(tournament);
         
@@ -312,6 +414,94 @@ app.post('/tournament/match/:matchId/result', async (req, res) => {
         
     } catch (error) {
         console.error('Fehler beim Eintragen des Match-Ergebnisses:', error);
+        res.status(500).json({ error: 'Interner Serverfehler' });
+    }
+});
+
+// Hilfsfunktion: Prüfen und nächste Runde erstellen
+async function checkAndAdvanceRound(tournament, currentRoundIndex) {
+    const currentRound = tournament.bracket.rounds[currentRoundIndex];
+    const allMatchesCompleted = currentRound.every(m => m.status === 'completed');
+    
+    if (allMatchesCompleted) {
+        // Nächste Runde erstellen oder Turnier beenden
+        const winners = currentRound.map(m => m.winner);
+        const advancingPlayers = [...winners];
+        
+        // Füge Spieler mit Freilosen hinzu (nur in erster Runde)
+        if (currentRoundIndex === 0 && tournament.bracket.playersWithByes) {
+            advancingPlayers.push(...tournament.bracket.playersWithByes);
+            tournament.bracket.playersWithByes = [];
+        }
+        
+        if (advancingPlayers.length === 1) {
+            // Turnier beendet
+            tournament.bracket.isComplete = true;
+            tournament.bracket.winner = advancingPlayers[0];
+            tournament.status = 'finished';
+            
+            // Auch in Hauptdatenbank aktualisieren
+            const db = await readDatabase();
+            db.tournamentStatus = 'finished';
+            db.tournamentWinner = advancingPlayers[0];
+            await writeDatabase(db);
+            
+            console.log(`Turnier beendet! Gewinner: ${advancingPlayers[0].username}`);
+        } else if (currentRoundIndex + 1 === tournament.bracket.currentRound) {
+            // Nur wenn wir in der aktuellen Runde sind, nächste Runde erstellen
+            tournament.bracket.currentRound++;
+            const nextRound = [];
+            
+            for (let i = 0; i < advancingPlayers.length; i += 2) {
+                if (i + 1 < advancingPlayers.length) {
+                    nextRound.push({
+                        id: `match_${Date.now()}_${i/2}_round${tournament.bracket.currentRound}`,
+                        player1: advancingPlayers[i],
+                        player2: advancingPlayers[i + 1],
+                        winner: null,
+                        score1: null,
+                        score2: null,
+                        status: 'pending',
+                        pendingResults: []
+                    });
+                }
+            }
+            
+            tournament.bracket.rounds.push(nextRound);
+            console.log(`Runde ${tournament.bracket.currentRound} erstellt mit ${nextRound.length} Matches`);
+        }
+    }
+}
+
+// Route: Konflikte abrufen (für Admin)
+app.get('/tournament/conflicts', async (req, res) => {
+    try {
+        const tournament = await readTournament();
+        if (!tournament) {
+            return res.status(404).json({ error: 'Turnier nicht gefunden' });
+        }
+        
+        const conflicts = [];
+        
+        tournament.bracket.rounds.forEach((round, roundIndex) => {
+            round.forEach(match => {
+                if (match.pendingResults && match.pendingResults.length === 2 && 
+                    match.pendingResults.some(r => r.conflict)) {
+                    conflicts.push({
+                        matchId: match.id,
+                        round: roundIndex + 1,
+                        player1: match.player1,
+                        player2: match.player2,
+                        results: match.pendingResults
+                    });
+                }
+            });
+        });
+        
+        res.json({ conflicts });
+        
+    } catch (error) {
+        console.error('Fehler beim Abrufen der Konflikte:', error);
         res.status(500).json({ error: 'Interner Serverfehler' });
     }
 });
@@ -387,6 +577,7 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server läuft auf http://localhost:${PORT}`);
     console.log(`Admin-Bereich: http://localhost:${PORT}/admin.html`);
+    console.log(`Öffentlicher Turnierbaum: http://localhost:${PORT}/tournament.html`);
 });
 
 // Graceful shutdown
