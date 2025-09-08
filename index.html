@@ -376,7 +376,7 @@
         // Register user in database
         async function registerUser(username, walletAddress) {
             try {
-                const response = await fetch('http://localhost:3000/register', {
+                const response = await fetch('https://fifaturnier.onrender.com/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -402,7 +402,7 @@
         // Check if user is already registered
         async function checkUserRegistration(walletAddress) {
             try {
-                const response = await fetch(`http://localhost:3000/user/${walletAddress}`);
+                const response = await fetch(`https://fifaturnier.onrender.com/user/${walletAddress}`);
                 
                 if (response.ok) {
                     const data = await response.json();
