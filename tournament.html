@@ -619,10 +619,9 @@
                         currentUser = await response.json();
                         updateUIAfterConnect();
                         findMyCurrentMatch();
+                        showMessage(`Willkommen zurück, ${currentUser.username}!`, 'success');
                     } else {
                         showMessage('Diese Wallet ist nicht für das Turnier registriert.', 'error');
-                        connectBtn.innerHTML = '<span>🦊</span>Mit MetaMask verbinden';
-                        connectBtn.disabled = false;
                     }
                 }
             } catch (error) {
@@ -632,7 +631,7 @@
                 } else {
                     showMessage('Fehler beim Verbinden mit MetaMask.', 'error');
                 }
-                
+            } finally {
                 const connectBtn = document.getElementById('connectBtn');
                 connectBtn.innerHTML = '<span>🦊</span>Mit MetaMask verbinden';
                 connectBtn.disabled = false;
@@ -697,7 +696,7 @@
             document.getElementById('opponentName').textContent = opponent.username;
             
             // Check for pending results
-            if (myCurrentMatch.pendingResults) {
+            if (myCurrentMatch.pendingResults && myCurrentMatch.pendingResults.length > 0) {
                 const myResult = myCurrentMatch.pendingResults.find(r => r.submittedBy === currentUser.id);
                 const opponentResult = myCurrentMatch.pendingResults.find(r => r.submittedBy === opponent.id);
                 
@@ -790,7 +789,7 @@
                 }
             } catch (error) {
                 console.error('Error submitting result:', error);
-                showMessage('Netzwerkfehler beim Einreichen.', 'error');
+                showMessage('Netzwerkfehler beim Einreichen. Überprüfen Sie die Serververbindung.', 'error');
             }
         }
 
@@ -809,12 +808,20 @@
                     if (currentUser) {
                         findMyCurrentMatch();
                     }
+                } else {
+                    console.error('Failed to load tournament data:', response.status);
+                    document.getElementById('bracketContainer').innerHTML = `
+                        <div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 2rem;">
+                            Fehler beim Laden der Turnierdaten (Server Status: ${response.status})
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading tournament:', error);
                 document.getElementById('bracketContainer').innerHTML = `
                     <div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 2rem;">
-                        Fehler beim Laden der Turnierdaten
+                        Fehler beim Laden der Turnierdaten<br>
+                        <small>Ist der Server unter localhost:3000 erreichbar?</small>
                     </div>
                 `;
             }
@@ -836,6 +843,9 @@
                     remainingMatches = currentRound.filter(m => m.status !== 'completed').length;
                 }
                 document.getElementById('remainingMatches').textContent = remainingMatches;
+            } else if (data.status === 'registration') {
+                document.getElementById('currentRound').textContent = 'Registrierung';
+                document.getElementById('remainingMatches').textContent = '-';
             } else {
                 document.getElementById('currentRound').textContent = 'Wartet';
                 document.getElementById('remainingMatches').textContent = '-';
@@ -905,14 +915,14 @@
                     const player1Classes = `bracket-player ${isCompleted && match.winner && match.winner.id === match.player1.id ? 'winner' : ''} ${isCompleted && match.winner && match.winner.id !== match.player1.id ? 'loser' : ''}`;
                     html += `<div class="${player1Classes}">
                         <span>${match.player1.username}</span>
-                        ${match.score1 !== undefined ? `<span class="score-display">${match.score1}</span>` : ''}
+                        ${match.score1 !== undefined && match.score1 !== null ? `<span class="score-display">${match.score1}</span>` : ''}
                     </div>`;
                     
                     // Player 2
                     const player2Classes = `bracket-player ${isCompleted && match.winner && match.winner.id === match.player2.id ? 'winner' : ''} ${isCompleted && match.winner && match.winner.id !== match.player2.id ? 'loser' : ''}`;
                     html += `<div class="${player2Classes}">
                         <span>${match.player2.username}</span>
-                        ${match.score2 !== undefined ? `<span class="score-display">${match.score2}</span>` : ''}
+                        ${match.score2 !== undefined && match.score2 !== null ? `<span class="score-display">${match.score2}</span>` : ''}
                     </div>`;
                     
                     // Show pending/conflict status
@@ -998,4 +1008,6 @@
                 }
             });
         }
-            
+    </script>
+</body>
+</html>
