@@ -864,7 +864,7 @@
                     const walletAddress = accounts[0];
                     
                     // Check if user is registered
-                    const response = await fetch(`https://fifaturnier.onrender.com/user/${walletAddress}`);
+                    const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
                     
                     if (response.ok) {
                         currentUser = await response.json();
@@ -1011,7 +1011,7 @@
             const score2 = isPlayer1 ? parseInt(opponentScore) : parseInt(myScore);
 
             try {
-                const response = await fetch(`https://fifaturnier.onrender.com/tournament/match/${myCurrentMatch.id}/submit-result`, {
+                const response = await fetch(`https://msi-38e5.onrender.com/tournament/match/${myCurrentMatch.id}/submit-result`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1047,7 +1047,7 @@
         // Load tournament data
         async function loadTournamentData() {
             try {
-                const response = await fetch('https://fifaturnier.onrender.com/tournament');
+                const response = await fetch('https://msi-38e5.onrender.com/tournament');
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -1229,7 +1229,7 @@
                     
                     if (accounts.length > 0) {
                         const walletAddress = accounts[0];
-                        const response = await fetch(`https://fifaturnier.onrender.com/user/${walletAddress}`);
+                        const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
                         
                         if (response.ok) {
                             currentUser = await response.json();
@@ -1260,5 +1260,5 @@
             });
         }
 		    </script>
-    </body>
+</body>
 </html>

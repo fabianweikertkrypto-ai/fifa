@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil bearbeiten - MSI Tournament</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+                radial-gradient(1px 1px at 90px 40px, #00ccff, transparent),
+                radial-gradient(1px 1px at 200px 150px, #00ff88, transparent),
+                radial-gradient(2px 2px at 350px 80px, #00ccff, transparent);
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            animation: float 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 30px rgba(0, 204, 255, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 204, 255, 0.6); }
+        }
+
+        @keyframes sweep {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .header {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-bottom: 2px solid #333;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, #00ccff, transparent);
+            animation: sweep 3s ease-in-out infinite;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #cccccc;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-link:hover {
+            color: #00ff88;
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 20px;
+            color: #ffffff;
+        }
+
+        .user-info.visible {
+            display: flex;
+            animation: fadeIn 0.6s ease-out 0.3s both;
+        }
+
+        .wallet-address {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #333;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .wallet-address:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .disconnect-btn {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .disconnect-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .disconnect-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        .disconnect-btn:hover::before {
+            left: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-container {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #00ff88);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .login-container:hover::before {
+            opacity: 0.3;
+        }
+
+        .registration-container {
+            display: none;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+            max-width: 600px;
+            width: 100%;
+            color: white;
+            position: relative;
+        }
+
+        .registration-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #00ff88);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .registration-container.visible {
+            display: block;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .profile-container {
+            display: none;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+            max-width: 800px;
+            width: 100%;
+            color: white;
+            position: relative;
+        }
+
+        .profile-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #00ff88);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .profile-container.visible {
+            display: block;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .metamask-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+            animation: pulse 2s infinite;
+            transition: all 0.3s ease;
+        }
+
+        .metamask-logo:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.6);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 25px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+            animation: pulse 2s infinite;
+            transition: all 0.3s ease;
+            color: #0a0a0a;
+            font-weight: bold;
+        }
+
+        .profile-avatar:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.6);
+        }
+
+        h1 {
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        h2 {
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            animation: glow 3s ease-in-out infinite alternate;
+            text-align: center;
+        }
+
+        .description {
+            color: #cccccc;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #00ff88;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .platform-icon {
+            font-size: 1.2rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #333;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input::placeholder {
+            color: #888;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .character-counter {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .character-counter.warning {
+            color: #f59e0b;
+        }
+
+        .character-counter.error {
+            color: #ff4757;
+        }
+
+        .current-value {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 10px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .current-value.empty {
+            color: #888;
+            font-style: italic;
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 30px auto 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+        }
+
+        .action-button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .connect-button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .connect-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .connect-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+        }
+
+        .connect-button:hover::before {
+            left: 100%;
+        }
+
+        .connect-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: linear-gradient(145deg, #2a1a1e, #1a0f0f);
+            color: #ff6b7a;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #ff4757;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .success-message {
+            background: linear-gradient(145deg, #1a2a1e, #0f1a0f);
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .success-message.visible {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .wallet-address {
+                font-size: 0.8rem;
+                word-break: break-all;
+                padding: 8px 15px;
+            }
+
+            .login-container, .registration-container, .profile-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .metamask-logo, .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .profile-avatar {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">🏆 MSI Tournament</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">🏠 Home</a>
+            <a href="tournament.html" class="nav-link">🏆 Turnier</a>
+            <a href="profile.html" class="nav-link">👤 Profil</a>
+        </div>
+        <div class="user-info" id="userInfo">
+            <span>Angemeldet als:</span>
+            <span class="wallet-address" id="walletAddress"></span>
+            <button class="disconnect-btn" onclick="disconnect()">Abmelden</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Login Container -->
+        <div class="login-container" id="loginContainer">
+            <div class="metamask-logo">🦊</div>
+            <h1>Profil verwalten</h1>
+            <p class="description">
+                Verbinden Sie Ihre MetaMask Wallet, um Ihr Profil zu bearbeiten oder sich zu registrieren.
+            </p>
+            
+            <button class="connect-button" id="connectButton" onclick="connectWallet()">
+                <span>🦊</span>
+                Mit MetaMask verbinden
+            </button>
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </div>
+
+        <!-- Registration Container (new user) -->
+        <div class="registration-container" id="registrationContainer">
+            <div class="profile-avatar">👋</div>
+            <h2>Willkommen! Registrieren Sie sich</h2>
+            <p class="description">
+                Diese Wallet ist noch nicht registriert. Erstellen Sie jetzt Ihr Profil für das MSI Tournament.
+            </p>
+            
+            <!-- Basic Registration -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>🌟</span>
+                    Basis-Registrierung (Erforderlich)
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="regPlatformUsername">
+                            <span class="platform-icon">👤</span>
+                            Platform Username *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="regPlatformUsername" 
+                            placeholder="Ihr Haupt-Username für das Tournament"
+                            maxlength="50"
+                            required
+                            oninput="updateCharacterCounter('regPlatformUsername')"
+                        >
+                        <div class="character-counter" id="regPlatformUsernameCounter">0/50 Zeichen</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gaming Profiles (Optional) -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>🎮</span>
+                    Gaming Profile (Optional)
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="regPlaystationGamertag">
+                            <span class="platform-icon">🎮</span>
+                            PlayStation ID
+                        </label>
+                        <input 
+                            type="text" 
+                            id="regPlaystationGamertag" 
+                            placeholder="PlayStation ID (optional)"
+                            maxlength="30"
+                            oninput="updateCharacterCounter('regPlaystationGamertag')"
+                        >
+                        <div class="character-counter" id="regPlaystationGamertagCounter">0/30 Zeichen</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regXboxGamertag">
+                            <span class="platform-icon">🎯</span>
+                            Xbox Gamertag
+                        </label>
+                        <input 
+                            type="text" 
+                            id="regXboxGamertag" 
+                            placeholder="Xbox Gamertag (optional)"
+                            maxlength="30"
+                            oninput="updateCharacterCounter('regXboxGamertag')"
+                        >
+                        <div class="character-counter" id="regXboxGamertagCounter">0/30 Zeichen</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regSteamGamertag">
+                            <span class="platform-icon">🚂</span>
+                            Steam Username
+                        </label>
+                        <input 
+                            type="text" 
+                            id="regSteamGamertag" 
+                            placeholder="Steam Username (optional)"
+                            maxlength="30"
+                            oninput="updateCharacterCounter('regSteamGamertag')"
+                        >
+                        <div class="character-counter" id="regSteamGamertagCounter">0/30 Zeichen</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-button" id="registerButton" onclick="registerUser()">
+                <span>🚀</span>
+                Jetzt registrieren
+            </button>
+            
+            <div class="error-message" id="registrationErrorMessage"></div>
+            <div class="success-message" id="registrationSuccessMessage"></div>
+        </div>
+
+        <!-- Profile Container (existing user) -->
+        <div class="profile-container" id="profileContainer">
+            <div class="profile-avatar" id="profileAvatar">?</div>
+            <h2>Profil bearbeiten</h2>
+            
+            <!-- User Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalWins">-</div>
+                    <div class="stat-label">Siege insgesamt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTournaments">-</div>
+                    <div class="stat-label">Turniere</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="fifaStats">-</div>
+                    <div class="stat-label">FIFA Siege</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="codStats">-</div>
+                    <div class="stat-label">COD Siege</div>
+                </div>
+            </div>
+
+            <!-- Platform Username -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>🌟</span>
+                    Hauptprofil
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="platformUsername">
+                            <span class="platform-icon">👤</span>
+                            Platform Username
+                        </label>
+                        <div class="current-value" id="currentPlatformUsername">Nicht gesetzt</div>
+                        <input 
+                            type="text" 
+                            id="platformUsername" 
+                            placeholder="Neuer Platform Username"
+                            maxlength="50"
+                            oninput="updateCharacterCounter('platformUsername')"
+                        >
+                        <div class="character-counter" id="platformUsernameCounter">0/50 Zeichen</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gaming Profiles -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>🎮</span>
+                    Gaming Profile
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="playstationGamertag">
+                            <span class="platform-icon">🎮</span>
+                            PlayStation ID
+                        </label>
+                        <div class="current-value" id="currentPlaystation">Nicht gesetzt</div>
+                        <input 
+                            type="text" 
+                            id="playstationGamertag" 
+                            placeholder="PlayStation ID eingeben"
+                            maxlength="30"
+                            oninput="updateCharacterCounter('playstationGamertag')"
+                        >
+                        <div class="character-counter" id="playstationGamertagCounter">0/30 Zeichen</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="xboxGamertag">
+                            <span class="platform-icon">🎯</span>
+                            Xbox Gamertag
+                        </label>
+                        <div class="current-value" id="currentXbox">Nicht gesetzt</div>
+                        <input 
+                            type="text" 
+                            id="xboxGamertag" 
+                            placeholder="Xbox Gamertag eingeben"
+                            maxlength="30"
+                            oninput="updateCharacterCounter('xboxGamertag')"
+                        >
+                        <div class="character-counter" id="xboxGamertagCounter">0/30 Zeichen</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="steamGamertag">
+                            <span class="platform-icon">🚂</span>
+                            Steam Username
+                        </label>
+                        <div class="current-value" id="currentSteam">Nicht gesetzt</div>
+                        <input 
+                            type="text" 
+                            id="steamGamertag" 
+                            placeholder="Steam Username eingeben"
+                            maxlength="30"
+                            oninput="updateCharacterCounter('steamGamertag')"
+                        >
+                        <div class="character-counter" id="steamGamertagCounter">0/30 Zeichen</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-button" id="saveButton" onclick="saveProfile()">
+                <span>💾</span>
+                Profil speichern
+            </button>
+            
+            <div class="error-message" id="profileErrorMessage"></div>
+            <div class="success-message" id="profileSuccessMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let originalUserData = null;
+        let connectedWallet = null;
+
+        // Check if MetaMask is installed
+        function isMetaMaskInstalled() {
+            return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+        }
+
+        // Show error message
+        function showError(message, containerId = 'errorMessage') {
+            const errorDiv = document.getElementById(containerId);
+            errorDiv.textContent = message;
+            errorDiv.classList.add('visible');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.remove('visible');
+            }, 5000);
+        }
+
+        // Hide error message
+        function hideError(containerId = 'errorMessage') {
+            const errorDiv = document.getElementById(containerId);
+            errorDiv.classList.remove('visible');
+        }
+
+        // Show success message
+        function showSuccess(message, containerId = 'successMessage') {
+            const successDiv = document.getElementById(containerId);
+            successDiv.textContent = message;
+            successDiv.classList.add('visible');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                successDiv.classList.remove('visible');
+            }, 5000);
+        }
+
+        // Hide success message
+        function hideSuccess(containerId = 'successMessage') {
+            const successDiv = document.getElementById(containerId);
+            successDiv.classList.remove('visible');
+        }
+
+        // Format wallet address for display
+        function formatAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        }
+
+        // Get first letter for avatar
+        function getInitial(username) {
+            return username ? username.charAt(0).toUpperCase() : '?';
+        }
+
+        // Update character counter
+        function updateCharacterCounter(inputId) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(inputId + 'Counter');
+            const length = input.value.length;
+            const maxLength = input.getAttribute('maxlength') || 30;
+            
+            counter.textContent = `${length}/${maxLength} Zeichen`;
+            
+            // Update counter styling based on length
+            counter.classList.remove('warning', 'error');
+            if (length >= maxLength * 0.8) {
+                counter.classList.add('warning');
+            }
+            if (length >= maxLength) {
+                counter.classList.add('error');
+            }
+        }
+
+        // Load user profile data
+        async function loadUserProfile(walletAddress) {
+            try {
+                const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    currentUser = userData;
+                    originalUserData = JSON.parse(JSON.stringify(userData)); // Deep copy
+                    
+                    displayUserProfile(userData);
+                    return { success: true, user: userData };
+                } else {
+                    return { success: false, notFound: true };
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                return { success: false, error: 'Netzwerkfehler' };
+            }
+        }
+
+        // Display user profile data
+        function displayUserProfile(userData) {
+            // Update avatar
+            document.getElementById('profileAvatar').textContent = getInitial(userData.platformUsername || userData.username);
+            
+            // Update stats
+            document.getElementById('totalWins').textContent = userData.stats.totalWins || 0;
+            const fifaWins = userData.stats.gameStats.fifa.wins || 0;
+            const codWins = userData.stats.gameStats.cod.wins || 0;
+            const totalTournaments = (userData.stats.gameStats.fifa.tournaments || 0) + 
+                                   (userData.stats.gameStats.cod.tournaments || 0);
+            
+            document.getElementById('totalTournaments').textContent = totalTournaments;
+            document.getElementById('fifaStats').textContent = fifaWins;
+            document.getElementById('codStats').textContent = codWins;
+            
+            // Update current values
+            const displayUsername = userData.platformUsername || userData.username;
+            document.getElementById('currentPlatformUsername').textContent = displayUsername || 'Nicht gesetzt';
+            document.getElementById('currentPlatformUsername').className = displayUsername ? 'current-value' : 'current-value empty';
+            
+            document.getElementById('currentPlaystation').textContent = userData.gamertags?.playstation || 'Nicht gesetzt';
+            document.getElementById('currentPlaystation').className = userData.gamertags?.playstation ? 'current-value' : 'current-value empty';
+            
+            document.getElementById('currentXbox').textContent = userData.gamertags?.xbox || 'Nicht gesetzt';
+            document.getElementById('currentXbox').className = userData.gamertags?.xbox ? 'current-value' : 'current-value empty';
+            
+            document.getElementById('currentSteam').textContent = userData.gamertags?.steam || 'Nicht gesetzt';
+            document.getElementById('currentSteam').className = userData.gamertags?.steam ? 'current-value' : 'current-value empty';
+            
+            // Set input placeholders with current values
+            const platformInput = document.getElementById('platformUsername');
+            const psInput = document.getElementById('playstationGamertag');
+            const xboxInput = document.getElementById('xboxGamertag');
+            const steamInput = document.getElementById('steamGamertag');
+            
+            platformInput.placeholder = displayUsername ? `Aktuell: ${displayUsername}` : 'Neuer Platform Username';
+            psInput.placeholder = userData.gamertags?.playstation ? `Aktuell: ${userData.gamertags.playstation}` : 'PlayStation ID eingeben';
+            xboxInput.placeholder = userData.gamertags?.xbox ? `Aktuell: ${userData.gamertags.xbox}` : 'Xbox Gamertag eingeben';
+            steamInput.placeholder = userData.gamertags?.steam ? `Aktuell: ${userData.gamertags.steam}` : 'Steam Username eingeben';
+            
+            // Initialize character counters
+            updateCharacterCounter('platformUsername');
+            updateCharacterCounter('playstationGamertag');
+            updateCharacterCounter('xboxGamertag');
+            updateCharacterCounter('steamGamertag');
+        }
+
+        // Show appropriate container based on user state
+        function showContainer(containerName) {
+            // Hide all containers
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registrationContainer').classList.remove('visible');
+            document.getElementById('profileContainer').classList.remove('visible');
+            
+            // Show the requested container
+            switch (containerName) {
+                case 'login':
+                    document.getElementById('loginContainer').style.display = 'block';
+                    break;
+                case 'registration':
+                    document.getElementById('registrationContainer').classList.add('visible');
+                    break;
+                case 'profile':
+                    document.getElementById('profileContainer').classList.add('visible');
+                    break;
+            }
+        }
+
+        // Update UI after wallet connection
+        async function updateConnectedUI(account) {
+            connectedWallet = account;
+            
+            // Show user info in header
+            document.getElementById('walletAddress').textContent = formatAddress(account);
+            document.getElementById('userInfo').classList.add('visible');
+            
+            // Try to load user profile
+            const profileResult = await loadUserProfile(account);
+            
+            if (profileResult.success) {
+                // User exists - show profile editing interface
+                showContainer('profile');
+                showSuccess(`Willkommen zurück, ${profileResult.user.platformUsername || profileResult.user.username}!`);
+            } else if (profileResult.notFound) {
+                // New user - show registration interface
+                showContainer('registration');
+                showSuccess('Wallet verbunden! Bitte vervollständigen Sie Ihre Registrierung.');
+            } else {
+                // Error loading profile
+                showError('Fehler beim Laden des Profils. Bitte versuchen Sie es erneut.');
+                showContainer('login');
+            }
+        }
+
+        // Update UI when disconnected
+        function updateDisconnectedUI() {
+            currentUser = null;
+            originalUserData = null;
+            connectedWallet = null;
+            
+            // Hide user info in header
+            document.getElementById('userInfo').classList.remove('visible');
+            
+            // Show login container
+            showContainer('login');
+            
+            // Clear all error and success messages
+            hideError();
+            hideSuccess();
+            hideError('registrationErrorMessage');
+            hideSuccess('registrationSuccessMessage');
+            hideError('profileErrorMessage');
+            hideSuccess('profileSuccessMessage');
+        }
+
+        // Connect to MetaMask
+        async function connectWallet() {
+            if (!isMetaMaskInstalled()) {
+                showError('MetaMask ist nicht installiert. Bitte installieren Sie die MetaMask Browser-Erweiterung.');
+                return;
+            }
+
+            try {
+                hideError();
+                hideSuccess();
+                const connectButton = document.getElementById('connectButton');
+                connectButton.textContent = 'Verbinde...';
+                connectButton.disabled = true;
+
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    const account = accounts[0];
+                    await updateConnectedUI(account);
+                } else {
+                    showError('Keine Konten gefunden. Bitte entsperren Sie MetaMask.');
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                if (error.code === 4001) {
+                    showError('Verbindung von Benutzer abgelehnt.');
+                } else {
+                    showError('Fehler beim Verbinden mit MetaMask: ' + error.message);
+                }
+            } finally {
+                const connectButton = document.getElementById('connectButton');
+                connectButton.innerHTML = '<span>🦊</span>Mit MetaMask verbinden';
+                connectButton.disabled = false;
+            }
+        }
+
+        // Register new user
+        async function registerUser() {
+            if (!connectedWallet) {
+                showError('Nicht mit MetaMask verbunden.', 'registrationErrorMessage');
+                return;
+            }
+
+            // Get form values
+            const platformUsername = document.getElementById('regPlatformUsername').value.trim();
+            const playstationGamertag = document.getElementById('regPlaystationGamertag').value.trim();
+            const xboxGamertag = document.getElementById('regXboxGamertag').value.trim();
+            const steamGamertag = document.getElementById('regSteamGamertag').value.trim();
+
+            // Validate required fields
+            if (!platformUsername) {
+                showError('Platform Username ist erforderlich.', 'registrationErrorMessage');
+                return;
+            }
+
+            if (platformUsername.length < 2) {
+                showError('Platform Username muss mindestens 2 Zeichen lang sein.', 'registrationErrorMessage');
+                return;
+            }
+
+            try {
+                hideError('registrationErrorMessage');
+                hideSuccess('registrationSuccessMessage');
+                
+                const registerButton = document.getElementById('registerButton');
+                registerButton.innerHTML = '<span>⏳</span>Registriere...';
+                registerButton.disabled = true;
+
+                // Prepare registration data
+                const registrationData = {
+                    walletAddress: connectedWallet,
+                    platformUsername: platformUsername,
+                    gamertags: {
+                        playstation: playstationGamertag,
+                        xbox: xboxGamertag,
+                        steam: steamGamertag
+                    }
+                };
+
+                const response = await fetch('https://msi-38e5.onrender.com/user/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registrationData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showSuccess('Registrierung erfolgreich! Sie werden zum Profil weitergeleitet...', 'registrationSuccessMessage');
+                    
+                    // Wait a moment then switch to profile view
+                    setTimeout(async () => {
+                        currentUser = result.user;
+                        originalUserData = JSON.parse(JSON.stringify(result.user));
+                        displayUserProfile(result.user);
+                        showContainer('profile');
+                        showSuccess('Willkommen beim MSI Tournament!', 'profileSuccessMessage');
+                    }, 2000);
+                    
+                } else {
+                    const error = await response.json();
+                    showError('Registrierung fehlgeschlagen: ' + error.error, 'registrationErrorMessage');
+                }
+            } catch (error) {
+                console.error('Error registering user:', error);
+                showError('Netzwerkfehler bei der Registrierung.', 'registrationErrorMessage');
+            } finally {
+                const registerButton = document.getElementById('registerButton');
+                registerButton.innerHTML = '<span>🚀</span>Jetzt registrieren';
+                registerButton.disabled = false;
+            }
+        }
+
+        // Save profile changes
+        async function saveProfile() {
+            if (!currentUser) {
+                showError('Nicht angemeldet.', 'profileErrorMessage');
+                return;
+            }
+
+            // Get form values
+            const platformUsername = document.getElementById('platformUsername').value.trim();
+            const playstationGamertag = document.getElementById('playstationGamertag').value.trim();
+            const xboxGamertag = document.getElementById('xboxGamertag').value.trim();
+            const steamGamertag = document.getElementById('steamGamertag').value.trim();
+
+            // Check if any changes were made
+            const currentPlatformUsername = originalUserData.platformUsername || originalUserData.username;
+            const hasChanges = 
+                (platformUsername && platformUsername !== currentPlatformUsername) ||
+                (playstationGamertag !== (originalUserData.gamertags?.playstation || '')) ||
+                (xboxGamertag !== (originalUserData.gamertags?.xbox || '')) ||
+                (steamGamertag !== (originalUserData.gamertags?.steam || ''));
+
+            if (!hasChanges) {
+                showError('Keine Änderungen erkannt.', 'profileErrorMessage');
+                return;
+            }
+
+            // Validate platform username if provided
+            if (platformUsername && platformUsername.length < 2) {
+                showError('Platform Username muss mindestens 2 Zeichen lang sein.', 'profileErrorMessage');
+                return;
+            }
+
+            try {
+                hideError('profileErrorMessage');
+                hideSuccess('profileSuccessMessage');
+                
+                const saveButton = document.getElementById('saveButton');
+                saveButton.innerHTML = '<span>⏳</span>Speichere...';
+                saveButton.disabled = true;
+
+                // Prepare update data
+                const updateData = {
+                    walletAddress: currentUser.walletAddress,
+                    platformUsername: platformUsername || currentPlatformUsername,
+                    gamertags: {
+                        playstation: playstationGamertag,
+                        xbox: xboxGamertag,
+                        steam: steamGamertag
+                    }
+                };
+
+                const response = await fetch('https://msi-38e5.onrender.com/user/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showSuccess('Profil erfolgreich aktualisiert!', 'profileSuccessMessage');
+                    
+                    // Update current user data and display
+                    currentUser = result.user;
+                    originalUserData = JSON.parse(JSON.stringify(result.user));
+                    displayUserProfile(result.user);
+                    
+                    // Clear form inputs
+                    document.getElementById('platformUsername').value = '';
+                    document.getElementById('playstationGamertag').value = '';
+                    document.getElementById('xboxGamertag').value = '';
+                    document.getElementById('steamGamertag').value = '';
+                    
+                    // Update character counters
+                    updateCharacterCounter('platformUsername');
+                    updateCharacterCounter('playstationGamertag');
+                    updateCharacterCounter('xboxGamertag');
+                    updateCharacterCounter('steamGamertag');
+                    
+                } else {
+                    const error = await response.json();
+                    showError('Fehler: ' + error.error, 'profileErrorMessage');
+                }
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showError('Netzwerkfehler beim Speichern des Profils.', 'profileErrorMessage');
+            } finally {
+                const saveButton = document.getElementById('saveButton');
+                saveButton.innerHTML = '<span>💾</span>Profil speichern';
+                saveButton.disabled = false;
+            }
+        }
+
+        // Disconnect from MetaMask
+        function disconnect() {
+            updateDisconnectedUI();
+        }
+
+        // Check if already connected on page load
+        async function checkConnection() {
+            if (isMetaMaskInstalled()) {
+                try {
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_accounts'
+                    });
+                    
+                    if (accounts.length > 0) {
+                        await updateConnectedUI(accounts[0]);
+                    }
+                } catch (error) {
+                    console.error('Error checking connection:', error);
+                }
+
+                // Listen for account changes
+                window.ethereum.on('accountsChanged', async (accounts) => {
+                    if (accounts.length > 0) {
+                        await updateConnectedUI(accounts[0]);
+                    } else {
+                        updateDisconnectedUI();
+                    }
+                });
+
+                // Listen for chain changes
+                window.ethereum.on('chainChanged', () => {
+                    // Reload page on chain change to ensure consistency
+                    window.location.reload();
+                });
+            }
+
+            // Initialize character counters for registration form
+            updateCharacterCounter('regPlatformUsername');
+            updateCharacterCounter('regPlaystationGamertag');
+            updateCharacterCounter('regXboxGamertag');
+            updateCharacterCounter('regSteamGamertag');
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', checkConnection);
+    </script>
+</body>
+</html>
+                

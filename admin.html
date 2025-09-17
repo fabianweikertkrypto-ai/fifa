@@ -13,29 +13,99 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
             color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+                radial-gradient(1px 1px at 90px 40px, #00ccff, transparent),
+                radial-gradient(1px 1px at 200px 150px, #00ff88, transparent),
+                radial-gradient(2px 2px at 350px 80px, #00ccff, transparent);
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            animation: float 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 30px rgba(0, 204, 255, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 204, 255, 0.6); }
+        }
+
+        @keyframes sweep {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 2px solid #333;
             padding: 2rem;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, #00ccff, transparent);
+            animation: sweep 3s ease-in-out infinite;
         }
 
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
-            background: linear-gradient(45deg, #10b981, #3b82f6);
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
         }
 
         .header p {
@@ -43,29 +113,8 @@
             font-size: 1.1rem;
         }
 
-        .tournament-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            margin-top: 1rem;
-            font-weight: bold;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .status-registration { background: #3b82f6; }
-        .status-started { background: #10b981; }
-        .status-finished { background: #f59e0b; }
-
         .dashboard {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -78,76 +127,54 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
             border-radius: 20px;
             padding: 2rem;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #00ff88);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.3;
         }
 
         .stat-number {
             font-size: 3rem;
             font-weight: bold;
-            color: #10b981;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 0.5rem;
+            animation: pulse 2s infinite;
         }
 
         .stat-label {
             font-size: 1.2rem;
             color: rgba(255, 255, 255, 0.8);
-        }
-
-        .tournament-controls {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .tournament-controls h2 {
-            margin-bottom: 1.5rem;
-            color: white;
-        }
-
-        .control-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .start-tournament-btn {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .start-tournament-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
-        }
-
-        .start-tournament-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
         }
 
         .controls {
@@ -158,34 +185,54 @@
             align-items: center;
         }
 
-        .refresh-btn {
-            background: linear-gradient(45deg, #10b981, #059669);
-            color: white;
+        .refresh-btn, .create-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
+            padding: 1rem 2rem;
+            border-radius: 25px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        .refresh-btn::before, .create-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .refresh-btn:hover, .create-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+        }
+
+        .refresh-btn:hover::before, .create-btn:hover::before {
+            left: 100%;
         }
 
         .search-box {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            border: 2px solid #333;
             border-radius: 25px;
-            padding: 0.8rem 1.5rem;
+            padding: 1rem 1.5rem;
             color: white;
             font-size: 1rem;
             width: 300px;
-            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
         .search-box::placeholder {
@@ -194,38 +241,297 @@
 
         .search-box:focus {
             outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            border-color: #00ff88;
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2), 0 0 20px rgba(0, 255, 136, 0.3);
+            transform: translateY(-2px);
         }
 
-        .tournament-bracket {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .games-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite alternate;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .game-card {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
             border-radius: 20px;
             padding: 2rem;
-            margin-bottom: 3rem;
-            display: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .tournament-bracket.visible {
-            display: block;
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
-        .tournament-bracket h2 {
-            margin-bottom: 2rem;
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: #00ff88;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .game-icon {
+            font-size: 2rem;
+        }
+
+        .tournament-count {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            color: #00ccff;
+            font-weight: bold;
+        }
+
+        .tournaments-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .tournament-item {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .tournament-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .tournament-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .tournament-name {
+            font-weight: bold;
             color: white;
+            font-size: 1.1rem;
+        }
+
+        .tournament-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-registration { background: #3b82f6; }
+        .status-started { background: #00ff88; }
+        .status-finished { background: #f59e0b; }
+
+        .tournament-info {
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .tournament-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        .create-tournament-btn {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #0a0a0a;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .create-tournament-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .create-tournament-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .create-tournament-btn:hover::before {
+            left: 100%;
+        }
+
+        .bracket-section {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bracket-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+                radial-gradient(1px 1px at 90px 40px, #00ccff, transparent);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .bracket-section.visible {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
         }
 
         .bracket-container {
             overflow-x: auto;
             padding: 1rem 0;
+            position: relative;
+            z-index: 1;
         }
 
         .bracket-rounds {
             display: flex;
             gap: 3rem;
             min-width: max-content;
+            justify-content: center;
         }
 
         .bracket-round {
@@ -238,21 +544,33 @@
         .round-title {
             text-align: center;
             font-weight: bold;
-            color: #10b981;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
             font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .match-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            border: 1px solid #333;
             border-radius: 15px;
             padding: 1.5rem;
             margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.2);
         }
 
         .match-card.completed {
-            border-color: #10b981;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
         }
 
         .match-players {
@@ -266,50 +584,56 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
             border-radius: 10px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
         }
 
         .player:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
 
         .player.winner {
-            background: rgba(16, 185, 129, 0.3);
-            border: 1px solid #10b981;
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.2));
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            font-weight: bold;
         }
 
         .player.loser {
             opacity: 0.5;
+            filter: grayscale(50%);
         }
 
         .bye-card {
-            background: rgba(245, 158, 11, 0.2);
-            border: 1px solid #f59e0b;
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 237, 78, 0.1));
+            border: 2px solid #ffd700;
             border-radius: 15px;
             padding: 1.5rem;
             margin: 1rem 0;
             text-align: center;
-            color: #f59e0b;
+            color: #ffd700;
             font-weight: bold;
+            animation: float 6s ease-in-out infinite;
         }
 
         .users-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
             border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .users-header {
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
             padding: 1.5rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #333;
             font-weight: bold;
             font-size: 1.2rem;
+            color: #00ff88;
         }
 
         .users-list {
@@ -319,16 +643,17 @@
 
         .user-card {
             display: grid;
-            grid-template-columns: auto 1fr auto auto;
+            grid-template-columns: auto 1fr auto;
             gap: 2rem;
             padding: 1.5rem 2rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             align-items: center;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
         }
 
         .user-card:hover {
             background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
         }
 
         .user-card:last-child {
@@ -339,12 +664,14 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #3b82f6, #10b981);
+            background: linear-gradient(45deg, #00ff88, #00ccff);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
             font-weight: bold;
+            color: #0a0a0a;
+            animation: float 8s ease-in-out infinite;
         }
 
         .user-info h3 {
@@ -359,26 +686,21 @@
         }
 
         .wallet-address {
-            font-family: monospace;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.3rem 0.8rem;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 0.5rem 1rem;
             border-radius: 15px;
             font-size: 0.85rem;
-            color: #10b981;
+            color: #00ccff;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid #333;
         }
 
         .wallet-address:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .user-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #10b981;
-            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 204, 255, 0.3);
         }
 
         .loading {
@@ -391,58 +713,186 @@
             width: 50px;
             height: 50px;
             border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #10b981;
+            border-top: 3px solid #00ff88;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message, .success-message {
+        .message {
             padding: 1rem 1.5rem;
-            border-radius: 10px;
+            border-radius: 15px;
             margin: 1rem 0;
             text-align: center;
             font-weight: bold;
+            display: none;
+            position: relative;
+            overflow: hidden;
         }
 
-        .error-message {
-            background: rgba(255, 99, 99, 0.2);
-            color: #ff6363;
-            border: 1px solid rgba(255, 99, 99, 0.5);
+        .message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: sweep 2s infinite;
         }
 
-        .success-message {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.5);
+        .message.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
         }
 
-        .copy-notification {
+        .message.error {
+            background: linear-gradient(145deg, rgba(255, 71, 87, 0.2), rgba(255, 107, 122, 0.1));
+            color: #ff6b7a;
+            border: 2px solid #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+        }
+
+        .message.success {
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 255, 0.1));
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .modal {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(16, 185, 129, 0.9);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .copy-notification.show {
-            opacity: 1;
+        .modal.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #ff4757;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 71, 87, 0.2);
+            transform: scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #333;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2), 0 0 20px rgba(0, 255, 136, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: white;
+            border: 2px solid #333;
+            padding: 0.8rem 1.5rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+            border-color: #00ff88;
         }
 
         @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+            }
+            
             .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .games-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -473,95 +923,138 @@
             .bracket-round {
                 min-width: 200px;
             }
+
+            .tournament-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🏆 Admin Dashboard</h1>
-        <p>MSI FIFA Tournament - Teilnehmer & Turnier Verwaltung</p>
-        <div class="tournament-status" id="tournamentStatus">
-            <div class="status-dot status-registration" id="statusDot"></div>
-            <span id="statusText">Registrierung läuft</span>
-        </div>
+        <p>MSI Tournament System - Spiele & Turniere verwalten</p>
     </div>
 
     <div class="dashboard">
         <!-- Statistiken -->
-        <div class="stats-grid" id="statsGrid">
+        <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="totalUsers">-</div>
-                <div class="stat-label">Registrierte Teilnehmer</div>
+                <div class="stat-label">Registrierte Benutzer</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeTournaments">-</div>
+                <div class="stat-label">Aktive Turniere</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="todayRegistrations">-</div>
                 <div class="stat-label">Heute registriert</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="lastHourRegistrations">-</div>
-                <div class="stat-label">Letzte Stunde</div>
-            </div>
-        </div>
-
-        <!-- Turnier Steuerung -->
-        <div class="tournament-controls" id="tournamentControls">
-            <h2>🎮 Turnier Steuerung</h2>
-            <div class="control-buttons">
-                <button class="start-tournament-btn" id="startTournamentBtn" onclick="startTournament()">
-                    <span>⚽</span>
-                    Turnier starten
-                </button>
-            </div>
-            <div id="tournamentMessage"></div>
-        </div>
-
-        <!-- Turnier Bracket -->
-        <div class="tournament-bracket" id="tournamentBracket">
-            <h2>📊 Turnier Bracket</h2>
-            <div class="bracket-container" id="bracketContainer">
-                <!-- Bracket wird hier geladen -->
-            </div>
         </div>
 
         <!-- Steuerungselemente -->
         <div class="controls">
-            <button class="refresh-btn" onclick="loadData()">
+            <button class="refresh-btn" onclick="loadAllData()">
                 <span>🔄</span>
-                Aktualisieren
+                Daten aktualisieren
             </button>
             <input 
                 type="text" 
                 class="search-box" 
                 id="searchBox" 
-                placeholder="Suche nach Username oder Wallet-Adresse..."
+                placeholder="Suche nach Benutzern..."
                 oninput="filterUsers()"
             >
+        </div>
+
+        <!-- Nachrichten -->
+        <div class="message" id="messageContainer"></div>
+
+        <!-- Spiele & Turniere -->
+        <div class="games-section">
+            <h2 class="section-title">
+                <span>🎮</span>
+                Spiele & Turniere
+            </h2>
+            <div class="games-grid" id="gamesGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Lade Spieledaten...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tournament Bracket (wird bei Bedarf angezeigt) -->
+        <div class="bracket-section" id="bracketSection">
+            <h2 class="section-title">
+                <span>📊</span>
+                Turnier Bracket: <span id="bracketTournamentName"></span>
+            </h2>
+            <div class="bracket-container" id="bracketContainer">
+                <!-- Bracket wird hier geladen -->
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn-secondary" onclick="hideBracket()">Bracket schließen</button>
+            </div>
         </div>
 
         <!-- Benutzerliste -->
         <div class="users-container">
             <div class="users-header">
-                Registrierte Teilnehmer
+                Registrierte Benutzer
             </div>
             <div class="users-list" id="usersList">
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Lade Teilnehmer...</p>
+                    <p>Lade Benutzer...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Copy Notification -->
-    <div class="copy-notification" id="copyNotification">
-        Wallet-Adresse kopiert!
+    <!-- Modal für neues Turnier -->
+    <div class="modal" id="createTournamentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Neues Turnier erstellen</h3>
+                <button class="close-btn" onclick="closeCreateTournamentModal()">&times;</button>
+            </div>
+            <form id="createTournamentForm">
+                <div class="form-group">
+                    <label for="tournamentGame">Spiel auswählen</label>
+                    <select id="tournamentGame" required style="width: 100%; padding: 1rem; border: 2px solid #333; border-radius: 15px; background: linear-gradient(145deg, #2a2a3e, #1a1a2e); color: white; font-size: 1rem;">
+                        <option value="">-- Spiel wählen --</option>
+                        <option value="fifa">FIFA</option>
+                        <option value="cod">Call of Duty</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tournamentName">Turnier Name</label>
+                    <input type="text" id="tournamentName" placeholder="z.B. MSI FIFA Championship 2025" required>
+                </div>
+                <div class="form-group">
+                    <label for="tournamentDescription">Beschreibung (optional)</label>
+                    <textarea id="tournamentDescription" placeholder="Beschreibung des Turniers..." rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeCreateTournamentModal()">Abbrechen</button>
+                    <button type="submit" class="action-btn">Turnier erstellen</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
         let allUsers = [];
         let filteredUsers = [];
-        let tournamentData = null;
-        let currentTournamentStatus = 'registration';
+        let gamesData = {};
+        let currentBracketData = null;
 
         // Formatiere Wallet-Adresse
         function formatAddress(address) {
@@ -581,79 +1074,395 @@
 
         // Erste Buchstabe für Avatar
         function getInitial(username) {
-            return username.charAt(0).toUpperCase();
+            return username ? username.charAt(0).toUpperCase() : '?';
+        }
+
+        // Nachricht anzeigen
+        function showMessage(message, type = 'info') {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.textContent = message;
+            messageContainer.className = `message visible ${type}`;
+            setTimeout(() => {
+                messageContainer.classList.remove('visible');
+            }, 5000);
+        }
+
+        // Alle Daten laden
+        async function loadAllData() {
+            await Promise.all([
+                loadUsers(),
+                loadGames()
+            ]);
+        }
+
+        // Benutzer laden
+        async function loadUsers() {
+            const usersList = document.getElementById('usersList');
+            
+            try {
+                const response = await fetch('https://msi-38e5.onrender.com/users/global');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                allUsers = data.users || [];
+                filteredUsers = [...allUsers];
+                
+                updateUserStats(data);
+                displayUsers();
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                usersList.innerHTML = `
+                    <div class="message error visible">
+                        <h3>Fehler beim Laden</h3>
+                        <p>Die Benutzerdaten konnten nicht geladen werden.</p>
+                        <p><strong>Fehler:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Spiele laden
+        async function loadGames() {
+            const gamesGrid = document.getElementById('gamesGrid');
+            
+            try {
+                const response = await fetch('https://msi-38e5.onrender.com/games');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                gamesData = await response.json();
+                displayGames();
+                updateTournamentStats();
+
+            } catch (error) {
+                console.error('Error loading games:', error);
+                gamesGrid.innerHTML = `
+                    <div class="message error visible">
+                        <h3>Fehler beim Laden</h3>
+                        <p>Die Spieledaten konnten nicht geladen werden.</p>
+                        <p><strong>Fehler:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Benutzer-Statistiken aktualisieren
+        function updateUserStats(data) {
+            const totalUsers = data.totalUsers || 0;
+            const today = new Date().toDateString();
+            
+            const todayRegistrations = data.users.filter(user => 
+                user.createdAt && new Date(user.createdAt).toDateString() === today
+            ).length;
+
+            animateValue('totalUsers', 0, totalUsers, 1000);
+            animateValue('todayRegistrations', 0, todayRegistrations, 1200);
+        }
+
+        // Turnier-Statistiken aktualisieren
+        function updateTournamentStats() {
+            let activeTournaments = 0;
+            
+            Object.values(gamesData).forEach(game => {
+                if (game.tournaments) {
+                    activeTournaments += Object.values(game.tournaments).filter(
+                        t => t.status === 'started' || t.status === 'registration'
+                    ).length;
+                }
+            });
+
+            animateValue('activeTournaments', 0, activeTournaments, 1400);
+        }
+
+        // Zahlen animieren
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            
+            if (range === 0) {
+                element.textContent = end;
+                return;
+            }
+            
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                element.textContent = current;
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // Spiele anzeigen
+        function displayGames() {
+            const gamesGrid = document.getElementById('gamesGrid');
+            
+            if (!gamesData || Object.keys(gamesData).length === 0) {
+                gamesGrid.innerHTML = `
+                    <div class="message error visible">
+                        <h3>Keine Spiele gefunden</h3>
+                        <p>Es sind keine Spiele im System vorhanden.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const gamesHTML = Object.values(gamesData).map(game => {
+                const tournaments = Object.values(game.tournaments || {});
+                const tournamentCount = tournaments.length;
+                
+                return `
+                    <div class="game-card">
+                        <div class="game-header">
+                            <div class="game-title">
+                                <span class="game-icon">${game.id === 'fifa' ? '⚽' : '🎯'}</span>
+                                ${game.name}
+                            </div>
+                            <div class="tournament-count">${tournamentCount} Turniere</div>
+                        </div>
+                        
+                        <div class="tournaments-list">
+                            ${tournaments.length === 0 ? 
+                                '<div style="text-align: center; color: rgba(255,255,255,0.6); padding: 2rem;">Keine Turniere vorhanden</div>' :
+                                tournaments.map(tournament => `
+                                    <div class="tournament-item">
+                                        <div class="tournament-header">
+                                            <div class="tournament-name">${tournament.name}</div>
+                                            <div class="tournament-status">
+                                                <div class="status-dot status-${tournament.status}"></div>
+                                                ${getStatusText(tournament.status)}
+                                            </div>
+                                        </div>
+                                        <div class="tournament-info">
+                                            <span>Teilnehmer: ${tournament.participants?.length || 0}</span>
+                                            <span>Erstellt: ${formatDate(tournament.createdAt)}</span>
+                                        </div>
+                                        <div class="tournament-actions">
+                                            ${tournament.status === 'registration' ? 
+                                                `<button class="action-btn" onclick="startTournament('${game.id}', '${tournament.id}')" ${(tournament.participants?.length || 0) < 2 ? 'disabled' : ''}>
+                                                    🚀 Starten
+                                                </button>` : ''
+                                            }
+                                            ${tournament.bracket ? 
+                                                `<button class="action-btn" onclick="showBracket('${game.id}', '${tournament.id}')">
+                                                    📊 Bracket
+                                                </button>` : ''
+                                            }
+                                            <button class="action-btn" onclick="viewTournamentDetails('${game.id}', '${tournament.id}')">
+                                                👁️ Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                        
+                        <button class="create-tournament-btn" onclick="openCreateTournamentModal('${game.id}')">
+                            <span>➕</span>
+                            Neues Turnier
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            gamesGrid.innerHTML = gamesHTML;
+        }
+
+        // Status-Text
+        function getStatusText(status) {
+            switch(status) {
+                case 'registration': return 'Registrierung';
+                case 'started': return 'Läuft';
+                case 'finished': return 'Beendet';
+                default: return 'Unbekannt';
+            }
+        }
+
+        // Benutzer anzeigen
+        function displayUsers() {
+            const usersList = document.getElementById('usersList');
+            
+            if (filteredUsers.length === 0) {
+                usersList.innerHTML = `
+                    <div class="message error visible">
+                        <h3>Keine Benutzer gefunden</h3>
+                        <p>Es sind keine Benutzer registriert oder sie entsprechen nicht den Suchkriterien.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const usersHTML = filteredUsers
+                .sort((a, b) => new Date(b.createdAt || b.registrationTime) - new Date(a.createdAt || a.registrationTime))
+                .map(user => `
+                    <div class="user-card">
+                        <div class="user-avatar">${getInitial(user.platformUsername || user.username)}</div>
+                        <div class="user-info">
+                            <h3>${user.platformUsername || user.username}</h3>
+                            <p><strong>Registriert:</strong> ${formatDate(user.createdAt || user.registrationTime)}</p>
+                            <p><strong>Siege:</strong> ${user.stats?.totalWins || 0} | <strong>FIFA:</strong> ${user.stats?.gameStats?.fifa?.wins || 0} | <strong>COD:</strong> ${user.stats?.gameStats?.cod?.wins || 0}</p>
+                            ${user.gamertags ? `
+                                <p><strong>PlayStation:</strong> ${user.gamertags.playstation || 'Nicht gesetzt'} | 
+                                   <strong>Xbox:</strong> ${user.gamertags.xbox || 'Nicht gesetzt'} | 
+                                   <strong>Steam:</strong> ${user.gamertags.steam || 'Nicht gesetzt'}</p>
+                            ` : ''}
+                        </div>
+                        <div class="wallet-address" onclick="copyToClipboard('${user.walletAddress}')" title="Klicken zum Kopieren">
+                            ${formatAddress(user.walletAddress)}
+                        </div>
+                    </div>
+                `).join('');
+
+            usersList.innerHTML = usersHTML;
+        }
+
+        // Benutzer filtern
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            filteredUsers = allUsers.filter(user => 
+                (user.platformUsername || user.username || '').toLowerCase().includes(searchTerm) ||
+                (user.walletAddress || '').toLowerCase().includes(searchTerm) ||
+                (user.gamertags?.playstation || '').toLowerCase().includes(searchTerm) ||
+                (user.gamertags?.xbox || '').toLowerCase().includes(searchTerm) ||
+                (user.gamertags?.steam || '').toLowerCase().includes(searchTerm)
+            );
+            
+            displayUsers();
         }
 
         // Wallet-Adresse kopieren
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                const notification = document.getElementById('copyNotification');
-                notification.classList.add('show');
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 2000);
+                showMessage('Wallet-Adresse kopiert!', 'success');
+            }).catch(() => {
+                showMessage('Kopieren fehlgeschlagen', 'error');
             });
         }
 
-        // Nachricht anzeigen
-        function showMessage(message, type = 'info') {
-            const messageDiv = document.getElementById('tournamentMessage');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
-            messageDiv.textContent = message;
-            setTimeout(() => {
-                messageDiv.textContent = '';
-                messageDiv.className = '';
-            }, 5000);
+        // Modal für neues Turnier öffnen
+        function openCreateTournamentModal(gameId) {
+            document.getElementById('tournamentGame').value = gameId;
+            document.getElementById('createTournamentModal').classList.add('visible');
         }
 
-        // Turnier-Status aktualisieren
-        function updateTournamentStatus(status, tournament = null) {
-            const statusText = document.getElementById('statusText');
-            const statusDot = document.getElementById('statusDot');
-            
-            currentTournamentStatus = status;
-            
-            statusDot.className = 'status-dot';
-            
-            switch (status) {
-                case 'registration':
-                    statusText.textContent = 'Registrierung läuft';
-                    statusDot.classList.add('status-registration');
-                    document.getElementById('startTournamentBtn').disabled = false;
-                    break;
-                case 'started':
-                    statusText.textContent = 'Turnier läuft';
-                    statusDot.classList.add('status-started');
-                    document.getElementById('startTournamentBtn').disabled = true;
-                    document.getElementById('startTournamentBtn').textContent = 'Turnier gestartet';
-                    if (tournament) {
-                        displayTournamentBracket(tournament);
-                    }
-                    break;
-                case 'finished':
-                    statusText.textContent = 'Turnier beendet';
-                    statusDot.classList.add('status-finished');
-                    document.getElementById('startTournamentBtn').disabled = true;
-                    document.getElementById('startTournamentBtn').textContent = 'Turnier beendet';
-                    if (tournament) {
-                        displayTournamentBracket(tournament);
-                    }
-                    break;
-            }
+        // Modal schließen
+        function closeCreateTournamentModal() {
+            document.getElementById('createTournamentModal').classList.remove('visible');
+            document.getElementById('createTournamentForm').reset();
         }
 
-        // Turnier-Bracket anzeigen
-        function displayTournamentBracket(tournament) {
-            const bracketContainer = document.getElementById('bracketContainer');
-            const tournamentBracket = document.getElementById('tournamentBracket');
+        // Neues Turnier erstellen
+        document.getElementById('createTournamentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            if (!tournament || !tournament.bracket) {
-                tournamentBracket.classList.remove('visible');
+            const gameId = document.getElementById('tournamentGame').value;
+            const name = document.getElementById('tournamentName').value.trim();
+            const description = document.getElementById('tournamentDescription').value.trim();
+            
+            if (!gameId || !name) {
+                showMessage('Bitte füllen Sie alle Pflichtfelder aus.', 'error');
                 return;
             }
             
-            tournamentBracket.classList.add('visible');
+            try {
+                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage('Turnier erfolgreich erstellt!', 'success');
+                    closeCreateTournamentModal();
+                    await loadGames();
+                } else {
+                    const error = await response.json();
+                    showMessage('Fehler beim Erstellen: ' + (error.error || 'Unbekannter Fehler'), 'error');
+                }
+            } catch (error) {
+                console.error('Error creating tournament:', error);
+                showMessage('Netzwerkfehler beim Erstellen des Turniers', 'error');
+            }
+        });
+
+        // Turnier starten
+        async function startTournament(gameId, tournamentId) {
+            if (!confirm('Turnier starten? Die Registrierung wird geschlossen und das Bracket erstellt.')) {
+                return;
+            }
             
+            try {
+                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage('Turnier erfolgreich gestartet!', 'success');
+                    await loadGames();
+                } else {
+                    const error = await response.json();
+                    showMessage('Fehler beim Starten: ' + (error.error || 'Unbekannter Fehler'), 'error');
+                }
+            } catch (error) {
+                console.error('Error starting tournament:', error);
+                showMessage('Netzwerkfehler beim Starten des Turniers', 'error');
+            }
+        }
+
+        // Bracket anzeigen
+        async function showBracket(gameId, tournamentId) {
+            try {
+                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
+                
+                if (response.ok) {
+                    const tournament = await response.json();
+                    currentBracketData = { gameId, tournamentId, tournament };
+                    displayBracket(tournament);
+                    document.getElementById('bracketTournamentName').textContent = tournament.name;
+                    document.getElementById('bracketSection').classList.add('visible');
+                    document.getElementById('bracketSection').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showMessage('Fehler beim Laden des Brackets', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading bracket:', error);
+                showMessage('Netzwerkfehler beim Laden des Brackets', 'error');
+            }
+        }
+
+        // Bracket ausblenden
+        function hideBracket() {
+            document.getElementById('bracketSection').classList.remove('visible');
+            currentBracketData = null;
+        }
+
+        // Bracket anzeigen
+        function displayBracket(tournament) {
+            const container = document.getElementById('bracketContainer');
+            
+            if (!tournament.bracket) {
+                container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.6); padding: 2rem;">Kein Bracket verfügbar</div>';
+                return;
+            }
+
             const bracket = tournament.bracket;
             let html = '<div class="bracket-rounds">';
             
@@ -664,7 +1473,7 @@
                 bracket.playersWithByes.forEach(player => {
                     html += `
                         <div class="bye-card">
-                            <strong>${player.username}</strong><br>
+                            <strong>${player.platformUsername || player.username}</strong><br>
                             <small>Freilos - direkt in Runde 2</small>
                         </div>
                     `;
@@ -687,15 +1496,22 @@
                             <div class="match-players">
                                 <div class="player ${isCompleted ? (match.winner && match.winner.id === match.player1.id ? 'winner' : 'loser') : ''}" 
                                      onclick="${!isCompleted ? `setMatchWinner('${match.id}', '${match.player1.id}')` : ''}">
-                                    <span><strong>${match.player1.username}</strong></span>
+                                    <span><strong>${match.player1.platformUsername || match.player1.username}</strong></span>
                                     ${isCompleted && match.winner && match.winner.id === match.player1.id ? '<span>🏆</span>' : ''}
+                                    ${match.score1 !== null && match.score1 !== undefined ? `<span>${match.score1}</span>` : ''}
                                 </div>
                                 <div class="player ${isCompleted ? (match.winner && match.winner.id === match.player2.id ? 'winner' : 'loser') : ''}"
                                      onclick="${!isCompleted ? `setMatchWinner('${match.id}', '${match.player2.id}')` : ''}">
-                                    <span><strong>${match.player2.username}</strong></span>
+                                    <span><strong>${match.player2.platformUsername || match.player2.username}</strong></span>
                                     ${isCompleted && match.winner && match.winner.id === match.player2.id ? '<span>🏆</span>' : ''}
+                                    ${match.score2 !== null && match.score2 !== undefined ? `<span>${match.score2}</span>` : ''}
                                 </div>
                             </div>
+                            ${match.pendingResults && match.pendingResults.length > 0 ? 
+                                `<div style="text-align: center; color: ${match.pendingResults.some(r => r.conflict) ? '#ff6363' : '#f59e0b'}; font-size: 0.8rem; margin-top: 0.5rem;">
+                                    ${match.pendingResults.some(r => r.conflict) ? '⚠️ Konflikt' : '⏳ Ausstehend'}
+                                </div>` : ''
+                            }
                         </div>
                     `;
                 });
@@ -711,7 +1527,7 @@
                     <div class="match-card completed">
                         <div class="match-players">
                             <div class="player winner">
-                                <span><strong>${bracket.winner.username}</strong></span>
+                                <span><strong>${bracket.winner.platformUsername || bracket.winner.username}</strong></span>
                                 <span>👑</span>
                             </div>
                         </div>
@@ -721,7 +1537,7 @@
             }
             
             html += '</div>';
-            bracketContainer.innerHTML = html;
+            container.innerHTML = html;
         }
 
         // Runden-Namen generieren
@@ -743,8 +1559,13 @@
                 return;
             }
             
+            if (!currentBracketData) {
+                showMessage('Bracket-Daten nicht verfügbar', 'error');
+                return;
+            }
+            
             try {
-                const response = await fetch(`https://fifaturnier.onrender.com/tournament/match/${matchId}/result`, {
+                const response = await fetch(`https://msi-38e5.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -753,227 +1574,575 @@
                 });
                 
                 if (response.ok) {
-                    const data = await response.json();
+                    const result = await response.json();
                     showMessage('Match-Ergebnis erfolgreich eingetragen!', 'success');
                     
-                    // Turnier-Daten aktualisieren
-                    tournamentData = data.tournament;
-                    displayTournamentBracket(tournamentData);
+                    // Bracket aktualisieren
+                    await showBracket(currentBracketData.gameId, currentBracketData.tournamentId);
                     
-                    // Status aktualisieren falls Turnier beendet
-                    if (tournamentData.status === 'finished') {
-                        updateTournamentStatus('finished', tournamentData);
-                        showMessage(`Turnier beendet! Gewinner: ${tournamentData.bracket.winner.username}`, 'success');
-                    }
+                    // Spiele-Liste aktualisieren
+                    await loadGames();
                 } else {
                     const error = await response.json();
-                    showMessage('Fehler: ' + error.error, 'error');
+                    showMessage('Fehler: ' + (error.error || 'Unbekannter Fehler'), 'error');
                 }
             } catch (error) {
+                console.error('Error setting match winner:', error);
                 showMessage('Netzwerkfehler beim Eintragen des Ergebnisses', 'error');
-                console.error('Error:', error);
             }
         }
 
-        // Turnier starten
-        async function startTournament() {
-            if (allUsers.length < 2) {
-                showMessage('Mindestens 2 Spieler müssen registriert sein!', 'error');
-                return;
-            }
-            
-            if (!confirm(`Turnier mit ${allUsers.length} Spielern starten? Die Registrierung wird geschlossen.`)) {
-                return;
-            }
-            
-            const startBtn = document.getElementById('startTournamentBtn');
-            const originalText = startBtn.innerHTML;
-            startBtn.innerHTML = '<span>⏳</span>Starte Turnier...';
-            startBtn.disabled = true;
-            
-            try {
-                const response = await fetch('https://fifaturnier.onrender.com/tournament/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    tournamentData = data.tournament;
-                    
-                    showMessage('Turnier erfolgreich gestartet!', 'success');
-                    updateTournamentStatus('started', tournamentData);
-                    
-                } else {
-                    const error = await response.json();
-                    showMessage('Fehler beim Starten: ' + error.error, 'error');
-                    startBtn.innerHTML = originalText;
-                    startBtn.disabled = false;
-                }
-            } catch (error) {
-                showMessage('Netzwerkfehler beim Starten des Turniers', 'error');
-                startBtn.innerHTML = originalText;
-                startBtn.disabled = false;
-                console.error('Error:', error);
-            }
+        // Turnier-Details anzeigen
+        function viewTournamentDetails(gameId, tournamentId) {
+            showMessage(`Details für Turnier ${tournamentId} werden geladen...`, 'success');
+            // Hier könnte ein weiteres Modal oder eine Detailansicht geöffnet werden
         }
 
-        // Daten laden (Benutzer + Turnier)
-        async function loadData() {
-            await loadUsers();
-            await loadTournament();
-        }
-
-        // Benutzer laden
-        async function loadUsers() {
-            const usersList = document.getElementById('usersList');
-            
-            usersList.innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Lade Teilnehmer...</p>
-                </div>
-            `;
-
-            try {
-                const response = await fetch('https://fifaturnier.onrender.com/users');
-                
-                if (!response.ok) {
-                    throw new Error('Fehler beim Laden der Daten');
-                }
-
-                const data = await response.json();
-                allUsers = data.users || [];
-                filteredUsers = [...allUsers];
-                
-                updateStats(data);
-                displayUsers();
-
-            } catch (error) {
-                console.error('Error loading users:', error);
-                usersList.innerHTML = `
-                    <div class="error-message">
-                        <h3>Fehler beim Laden</h3>
-                        <p>Die Teilnehmerdaten konnten nicht geladen werden.</p>
-                        <p><strong>Fehler:</strong> ${error.message}</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Turnier-Daten laden
-        async function loadTournament() {
-            try {
-                const response = await fetch('https://fifaturnier.onrender.com/tournament');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    tournamentData = data.tournament;
-                    updateTournamentStatus(data.status || 'registration', data.tournament);
-                }
-            } catch (error) {
-                console.error('Error loading tournament:', error);
-            }
-        }
-
-        // Statistiken aktualisieren
-        function updateStats(data) {
-            const totalUsers = data.users.length;
-            const today = new Date().toDateString();
-            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-
-            const todayRegistrations = data.users.filter(user => 
-                new Date(user.registrationTime).toDateString() === today
-            ).length;
-
-            const lastHourRegistrations = data.users.filter(user => 
-                new Date(user.registrationTime) > oneHourAgo
-            ).length;
-
-            animateValue('totalUsers', 0, totalUsers, 1000);
-            animateValue('todayRegistrations', 0, todayRegistrations, 1200);
-            animateValue('lastHourRegistrations', 0, lastHourRegistrations, 1400);
-        }
-
-        // Zahlen animieren
-        function animateValue(id, start, end, duration) {
-            const element = document.getElementById(id);
-            const range = end - start;
-            const increment = end > start ? 1 : -1;
-            const stepTime = Math.abs(Math.floor(duration / range));
-            let current = start;
-
-            const timer = setInterval(() => {
-                current += increment;
-                element.textContent = current;
-                if (current === end) {
-                    clearInterval(timer);
-                }
-            }, stepTime);
-        }
-
-        // Benutzer anzeigen
-        function displayUsers() {
-            const usersList = document.getElementById('usersList');
-            
-            if (filteredUsers.length === 0) {
-                usersList.innerHTML = `
-                    <div class="empty-state">
-                        <h3>Keine Teilnehmer gefunden</h3>
-                        <p>Es sind noch keine Teilnehmer für das Tournament registriert.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const usersHTML = filteredUsers
-                .sort((a, b) => new Date(b.registrationTime) - new Date(a.registrationTime))
-                .map(user => `
-                    <div class="user-card">
-                        <div class="user-avatar">${getInitial(user.username)}</div>
-                        <div class="user-info">
-                            <h3>${user.username}</h3>
-                            <p><strong>Registriert:</strong> ${formatDate(user.registrationTime)}</p>
-                            <p><strong>ID:</strong> ${user.id}</p>
-                        </div>
-                        <div class="wallet-address" onclick="copyToClipboard('${user.walletAddress}')" title="Klicken zum Kopieren">
-                            ${formatAddress(user.walletAddress)}
-                        </div>
-                        <div class="user-status">
-                            <div class="status-dot"></div>
-                            Aktiv
-                        </div>
-                    </div>
-                `).join('');
-
-            usersList.innerHTML = usersHTML;
-        }
-
-        // Benutzer filtern
-        function filterUsers() {
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-            
-            filteredUsers = allUsers.filter(user => 
-                user.username.toLowerCase().includes(searchTerm) ||
-                user.walletAddress.toLowerCase().includes(searchTerm) ||
-                user.id.includes(searchTerm)
-            );
-            
-            displayUsers();
-        }
-
-        // Automatisch aktualisieren alle 30 Sekunden
+        // Auto-Refresh alle 30 Sekunden
         function startAutoRefresh() {
-            setInterval(loadData, 30000);
+            setInterval(loadAllData, 30000);
         }
+
+        // Modal schließen bei Klick außerhalb
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeCreateTournamentModal();
+            }
+        });
 
         // Seite laden
         window.addEventListener('load', () => {
-            loadData();
+            loadAllData();
             startAutoRefresh();
         });
+		// Turnier-Details Modal
+function openTournamentDetailsModal(gameId, tournamentId) {
+    const tournament = gamesData[gameId].tournaments[tournamentId];
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal" id="tournamentDetailsModal">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Turnier Details: ${tournament.name}</h3>
+                    <button class="close-btn" onclick="closeTournamentDetailsModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="info-card">
+                            <strong>Status</strong>
+                            <span>${getStatusText(tournament.status)}</span>
+                        </div>
+                        <div class="info-card">
+                            <strong>Teilnehmer</strong>
+                            <span>${tournament.participants?.length || 0}</span>
+                        </div>
+                        <div class="info-card">
+                            <strong>Erstellt</strong>
+                            <span>${formatDate(tournament.createdAt)}</span>
+                        </div>
+                        ${tournament.startedAt ? `
+                        <div class="info-card">
+                            <strong>Gestartet</strong>
+                            <span>${formatDate(tournament.startedAt)}</span>
+                        </div>` : ''}
+                        ${tournament.finishedAt ? `
+                        <div class="info-card">
+                            <strong>Beendet</strong>
+                            <span>${formatDate(tournament.finishedAt)}</span>
+                        </div>` : ''}
+                    </div>
+                    
+                    ${tournament.description ? `
+                    <div class="form-group">
+                        <label>Beschreibung</label>
+                        <div style="background: linear-gradient(145deg, #2a2a3e, #1a1a2e); padding: 1rem; border-radius: 10px; border: 1px solid #333; color: white;">
+                            ${tournament.description}
+                        </div>
+                    </div>` : ''}
+                    
+                    <div class="form-group">
+                        <label>Teilnehmer (${tournament.participants?.length || 0})</label>
+                        <div class="participants-list" style="max-height: 200px; overflow-y: auto;">
+                            ${(tournament.participants || []).map(participant => `
+                                <div class="participant-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: linear-gradient(145deg, #2a2a3e, #1a1a2e); margin-bottom: 0.5rem; border-radius: 8px; border: 1px solid #333;">
+                                    <div>
+                                        <strong>${participant.platformUsername || participant.username}</strong>
+                                        <div style="font-size: 0.8rem; color: #888;">
+                                            ${formatAddress(participant.walletAddress)}
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #00ccff;">
+                                        ${formatDate(participant.registrationTime)}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    ${tournament.winner ? `
+                    <div class="form-group">
+                        <label>Sieger</label>
+                        <div style="background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 255, 0.1)); padding: 1rem; border-radius: 10px; border: 1px solid #00ff88; color: #00ff88; text-align: center; font-weight: bold;">
+                            🏆 ${tournament.winner.platformUsername || tournament.winner.username}
+                        </div>
+                    </div>` : ''}
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeTournamentDetailsModal()">Schließen</button>
+                    ${tournament.status === 'registration' && tournament.participants.length >= 2 ? `
+                        <button class="action-btn" onclick="startTournament('${gameId}', '${tournamentId}'); closeTournamentDetailsModal();">
+                            Turnier starten
+                        </button>
+                    ` : ''}
+                    ${tournament.status === 'started' && tournament.bracket ? `
+                        <button class="action-btn" onclick="showBracket('${gameId}', '${tournamentId}'); closeTournamentDetailsModal();">
+                            Bracket anzeigen
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('tournamentDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('tournamentDetailsModal').classList.add('visible');
+}
+
+function closeTournamentDetailsModal() {
+    const modal = document.getElementById('tournamentDetailsModal');
+    if (modal) {
+        modal.classList.remove('visible');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+// Erweiterte Bracket-Funktionen
+function exportBracket(gameId, tournamentId) {
+    const tournament = gamesData[gameId].tournaments[tournamentId];
+    if (!tournament.bracket) {
+        showMessage('Kein Bracket verfügbar', 'error');
+        return;
+    }
+    
+    const exportData = {
+        tournamentName: tournament.name,
+        gameId: gameId,
+        status: tournament.status,
+        participants: tournament.participants,
+        bracket: tournament.bracket,
+        exportedAt: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tournament_${tournament.name.replace(/\s+/g, '_')}_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showMessage('Bracket exportiert!', 'success');
+}
+
+// Turnier löschen
+async function deleteTournament(gameId, tournamentId) {
+    const tournament = gamesData[gameId].tournaments[tournamentId];
+    
+    if (!confirm(`Turnier "${tournament.name}" wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            showMessage('Turnier erfolgreich gelöscht!', 'success');
+            await loadGames();
+            hideBracket(); // Falls das gelöschte Turnier gerade angezeigt wird
+        } else {
+            const error = await response.json();
+            showMessage('Fehler beim Löschen: ' + (error.error || 'Unbekannter Fehler'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting tournament:', error);
+        showMessage('Netzwerkfehler beim Löschen des Turniers', 'error');
+    }
+}
+
+// Turnier zurücksetzen (nur bei registration status)
+async function resetTournament(gameId, tournamentId) {
+    const tournament = gamesData[gameId].tournaments[tournamentId];
+    
+    if (tournament.status !== 'registration') {
+        showMessage('Nur Turniere im Registrierungsstatus können zurückgesetzt werden', 'error');
+        return;
+    }
+    
+    if (!confirm(`Alle Registrierungen für "${tournament.name}" löschen?\n\nAlle Teilnehmer werden entfernt!`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/reset`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            showMessage('Turnier erfolgreich zurückgesetzt!', 'success');
+            await loadGames();
+        } else {
+            const error = await response.json();
+            showMessage('Fehler beim Zurücksetzen: ' + (error.error || 'Unbekannter Fehler'), 'error');
+        }
+    } catch (error) {
+        console.error('Error resetting tournament:', error);
+        showMessage('Netzwerkfehler beim Zurücksetzen des Turniers', 'error');
+    }
+}
+
+// Match-Ergebnis bearbeiten (für Admins)
+function editMatchResult(matchId) {
+    if (!currentBracketData) {
+        showMessage('Bracket-Daten nicht verfügbar', 'error');
+        return;
+    }
+    
+    // Finde das Match
+    let targetMatch = null;
+    for (const round of currentBracketData.tournament.bracket.rounds) {
+        const match = round.find(m => m.id === matchId);
+        if (match) {
+            targetMatch = match;
+            break;
+        }
+    }
+    
+    if (!targetMatch) {
+        showMessage('Match nicht gefunden', 'error');
+        return;
+    }
+    
+    const score1 = prompt(`Spielstand für ${targetMatch.player1.platformUsername || targetMatch.player1.username}:`, targetMatch.score1 || '0');
+    if (score1 === null) return;
+    
+    const score2 = prompt(`Spielstand für ${targetMatch.player2.platformUsername || targetMatch.player2.username}:`, targetMatch.score2 || '0');
+    if (score2 === null) return;
+    
+    const parsedScore1 = parseInt(score1);
+    const parsedScore2 = parseInt(score2);
+    
+    if (isNaN(parsedScore1) || isNaN(parsedScore2)) {
+        showMessage('Ungültige Spielstände eingegeben', 'error');
+        return;
+    }
+    
+    if (parsedScore1 === parsedScore2) {
+        showMessage('Unentschieden sind nicht erlaubt', 'error');
+        return;
+    }
+    
+    // Ergebnis setzen
+    setMatchResultWithScore(matchId, parsedScore1, parsedScore2);
+}
+
+async function setMatchResultWithScore(matchId, score1, score2) {
+    if (!currentBracketData) {
+        showMessage('Bracket-Daten nicht verfügbar', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`https://msi-38e5.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                score1: score1, 
+                score2: score2 
+            })
+        });
+        
+        if (response.ok) {
+            showMessage('Match-Ergebnis erfolgreich aktualisiert!', 'success');
+            
+            // Bracket aktualisieren
+            await showBracket(currentBracketData.gameId, currentBracketData.tournamentId);
+            
+            // Spiele-Liste aktualisieren
+            await loadGames();
+        } else {
+            const error = await response.json();
+            showMessage('Fehler: ' + (error.error || 'Unbekannter Fehler'), 'error');
+        }
+    } catch (error) {
+        console.error('Error setting match result:', error);
+        showMessage('Netzwerkfehler beim Aktualisieren des Ergebnisses', 'error');
+    }
+}
+
+// Erweiterte displayBracket Funktion mit Admin-Kontrollen
+function displayBracketWithAdminControls(tournament) {
+    const container = document.getElementById('bracketContainer');
+    
+    if (!tournament.bracket) {
+        container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.6); padding: 2rem;">Kein Bracket verfügbar</div>';
+        return;
+    }
+
+    const bracket = tournament.bracket;
+    let html = '<div class="bracket-rounds">';
+    
+    // Freilose anzeigen falls vorhanden
+    if (bracket.playersWithByes && bracket.playersWithByes.length > 0 && bracket.currentRound === 1) {
+        html += '<div class="bracket-round">';
+        html += '<div class="round-title">Freilose</div>';
+        bracket.playersWithByes.forEach(player => {
+            html += `
+                <div class="bye-card">
+                    <strong>${player.platformUsername || player.username}</strong><br>
+                    <small>Freilos - direkt in Runde 2</small>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    // Alle Runden anzeigen mit Admin-Kontrollen
+    bracket.rounds.forEach((round, roundIndex) => {
+        const roundNumber = roundIndex + 1;
+        const roundName = getRoundName(roundNumber, bracket.totalRounds);
+        
+        html += '<div class="bracket-round">';
+        html += `<div class="round-title">${roundName}</div>`;
+        
+        round.forEach(match => {
+            const isCompleted = match.status === 'completed';
+            html += `
+                <div class="match-card ${isCompleted ? 'completed' : ''}">
+                    <div class="match-players">
+                        <div class="player ${isCompleted ? (match.winner && match.winner.id === match.player1.id ? 'winner' : 'loser') : ''}" 
+                             onclick="${!isCompleted ? `setMatchWinner('${match.id}', '${match.player1.id}')` : ''}">
+                            <span><strong>${match.player1.platformUsername || match.player1.username}</strong></span>
+                            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                ${match.score1 !== null && match.score1 !== undefined ? `<span>${match.score1}</span>` : ''}
+                                ${isCompleted && match.winner && match.winner.id === match.player1.id ? '<span>🏆</span>' : ''}
+                            </span>
+                        </div>
+                        <div class="player ${isCompleted ? (match.winner && match.winner.id === match.player2.id ? 'winner' : 'loser') : ''}"
+                             onclick="${!isCompleted ? `setMatchWinner('${match.id}', '${match.player2.id}')` : ''}">
+                            <span><strong>${match.player2.platformUsername || match.player2.username}</strong></span>
+                            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                ${match.score2 !== null && match.score2 !== undefined ? `<span>${match.score2}</span>` : ''}
+                                ${isCompleted && match.winner && match.winner.id === match.player2.id ? '<span>🏆</span>' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Controls -->
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+                        <button class="action-btn" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" 
+                                onclick="editMatchResult('${match.id}')">
+                            ✏️ Bearbeiten
+                        </button>
+                        ${isCompleted ? `
+                            <button class="action-btn danger" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" 
+                                    onclick="resetMatch('${match.id}')">
+                                🔄 Zurücksetzen
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    ${match.pendingResults && match.pendingResults.length > 0 ? 
+                        `<div style="text-align: center; color: ${match.pendingResults.some(r => r.conflict) ? '#ff6363' : '#f59e0b'}; font-size: 0.8rem; margin-top: 0.5rem;">
+                            ${match.pendingResults.some(r => r.conflict) ? '⚠️ Konflikt - Admin-Entscheidung erforderlich' : '⏳ Warte auf Bestätigung'}
+                            <div style="margin-top: 0.3rem;">
+                                ${match.pendingResults.map(result => 
+                                    `<div style="font-size: 0.7rem;">${result.submittedBy === match.player1.id ? (match.player1.platformUsername || match.player1.username) : (match.player2.platformUsername || match.player2.username)}: ${result.score1}:${result.score2}</div>`
+                                ).join('')}
+                            </div>
+                        </div>` : ''
+                    }
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+    });
+    
+    // Gewinner anzeigen falls Turnier beendet
+    if (bracket.isComplete && bracket.winner) {
+        html += '<div class="bracket-round">';
+        html += '<div class="round-title">🏆 Sieger</div>';
+        html += `
+            <div class="match-card completed">
+                <div class="match-players">
+                    <div class="player winner">
+                        <span><strong>${bracket.winner.platformUsername || bracket.winner.username}</strong></span>
+                        <span>👑</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        html += '</div>';
+    }
+    
+    html += '</div>';
+    
+    // Admin-Kontrollen unter dem Bracket
+    html += `
+        <div style="margin-top: 2rem; text-align: center; padding: 1rem; background: linear-gradient(145deg, #2a2a3e, #1a1a2e); border-radius: 15px; border: 1px solid #333;">
+            <h3 style="color: #00ff88; margin-bottom: 1rem;">Admin-Kontrollen</h3>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                <button class="action-btn" onclick="exportBracket('${currentBracketData.gameId}', '${currentBracketData.tournamentId}')">
+                    📁 Bracket exportieren
+                </button>
+                ${tournament.status !== 'finished' ? `
+                    <button class="action-btn danger" onclick="cancelTournament('${currentBracketData.gameId}', '${currentBracketData.tournamentId}')">
+                        ❌ Turnier abbrechen
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// Match zurücksetzen
+async function resetMatch(matchId) {
+    if (!confirm('Match-Ergebnis wirklich zurücksetzen?\n\nDas Match wird wieder als ausstehend markiert.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`https://msi-38e5.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/reset`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            showMessage('Match erfolgreich zurückgesetzt!', 'success');
+            
+            // Bracket aktualisieren
+            await showBracket(currentBracketData.gameId, currentBracketData.tournamentId);
+            
+            // Spiele-Liste aktualisieren
+            await loadGames();
+        } else {
+            const error = await response.json();
+            showMessage('Fehler beim Zurücksetzen: ' + (error.error || 'Unbekannter Fehler'), 'error');
+        }
+    } catch (error) {
+        console.error('Error resetting match:', error);
+        showMessage('Netzwerkfehler beim Zurücksetzen des Matches', 'error');
+    }
+}
+
+// Turnier abbrechen
+async function cancelTournament(gameId, tournamentId) {
+    const tournament = gamesData[gameId].tournaments[tournamentId];
+    
+    if (!confirm(`Turnier "${tournament.name}" wirklich abbrechen?\n\nAlle Fortschritte gehen verloren und das Turnier wird gelöscht!`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            showMessage('Turnier erfolgreich abgebrochen!', 'success');
+            hideBracket();
+            await loadGames();
+        } else {
+            const error = await response.json();
+            showMessage('Fehler beim Abbrechen: ' + (error.error || 'Unbekannter Fehler'), 'error');
+        }
+    } catch (error) {
+        console.error('Error canceling tournament:', error);
+        showMessage('Netzwerkfehler beim Abbrechen des Turniers', 'error');
+    }
+}
+
+// Update der showBracket Funktion um Admin-Kontrollen zu verwenden
+const originalShowBracket = showBracket;
+async function showBracket(gameId, tournamentId) {
+    try {
+        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
+        
+        if (response.ok) {
+            const tournament = await response.json();
+            currentBracketData = { gameId, tournamentId, tournament };
+            displayBracketWithAdminControls(tournament); // Verwende die erweiterte Version
+            document.getElementById('bracketTournamentName').textContent = tournament.name;
+            document.getElementById('bracketSection').classList.add('visible');
+            document.getElementById('bracketSection').scrollIntoView({ behavior: 'smooth' });
+        } else {
+            showMessage('Fehler beim Laden des Brackets', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading bracket:', error);
+        showMessage('Netzwerkfehler beim Laden des Brackets', 'error');
+    }
+}
+
+// Update der viewTournamentDetails Funktion
+function viewTournamentDetails(gameId, tournamentId) {
+    openTournamentDetailsModal(gameId, tournamentId);
+}
+
+// Zusätzliche Utility-Funktionen für bessere UX
+function confirmAction(message, callback) {
+    if (confirm(message)) {
+        callback();
+    }
+}
+
+function formatPlayerName(player) {
+    return player.platformUsername || player.username || 'Unbekannt';
+}
+
+// Keyboard shortcuts für häufige Admin-Aktionen
+document.addEventListener('keydown', (e) => {
+    // Strg+R: Daten aktualisieren
+    if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        loadAllData();
+        showMessage('Daten werden aktualisiert...', 'success');
+    }
+    
+    // Esc: Modals/Bracket schließen
+    if (e.key === 'Escape') {
+        closeTournamentDetailsModal();
+        closeCreateTournamentModal();
+        if (document.getElementById('bracketSection').classList.contains('visible')) {
+            hideBracket();
+        }
+    }
+});
     </script>
 </body>
 </html>

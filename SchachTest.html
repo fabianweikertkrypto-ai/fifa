@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSI Chess Tournament</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+                radial-gradient(1px 1px at 90px 40px, #00ccff, transparent),
+                radial-gradient(1px 1px at 200px 150px, #00ff88, transparent),
+                radial-gradient(2px 2px at 350px 80px, #00ccff, transparent);
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            animation: float 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.6), 0 0 40px rgba(0, 204, 255, 0.3); }
+        }
+
+        @keyframes checkWarning {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.1);
+            }
+        }
+
+        .header {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-bottom: 2px solid #333;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 20px;
+            color: #ffffff;
+        }
+
+        .user-info.visible {
+            display: flex;
+            animation: fadeIn 0.6s ease-out 0.3s both;
+        }
+
+        .wallet-address {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #333;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .connect-button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .connect-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .connect-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+        }
+
+        .connect-button:hover::before {
+            left: 100%;
+        }
+
+        .main-content {
+            display: flex;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        .tournament-info {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .chess-game-area {
+            flex: 0 0 800px;
+            display: none;
+        }
+
+        .chess-game-area.active {
+            display: block;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .tournament-status {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tournament-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tournament-bracket {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 2rem;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .bracket-rounds {
+            display: flex;
+            gap: 3rem;
+            min-width: max-content;
+            justify-content: center;
+        }
+
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 2rem;
+            min-width: 250px;
+        }
+
+        .round-title {
+            text-align: center;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .match-card {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .match-card.completed {
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .match-card.active-match {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 237, 78, 0.1));
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .player {
+            padding: 0.8rem;
+            margin: 0.3rem 0;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        .player.winner {
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.2));
+            border: 2px solid #00ff88;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .player.loser {
+            opacity: 0.5;
+            filter: grayscale(50%);
+        }
+
+        .chess-container {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .chess-board-section {
+            flex: 0 0 520px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 2px solid var(--border-color, #333);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin: 0 auto;
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .square.light {
+            background: linear-gradient(135deg, #2c2c54, #40407a);
+        }
+
+        .square.dark {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+        }
+
+        .square:hover {
+            transform: scale(1.1);
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .square.selected {
+            background: linear-gradient(45deg, #00ff88, #00ccff) !important;
+            animation: glow 2s ease-in-out infinite;
+            transform: scale(1.05);
+        }
+
+        .square.valid-move {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.3)) !important;
+            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .square.valid-move::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #00ff88;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .square.in-check {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a) !important;
+            animation: checkWarning 0.5s ease-in-out 4;
+        }
+
+        .piece {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            transition: all 0.3s ease;
+        }
+
+        .piece:hover {
+            filter: drop-shadow(0 4px 8px rgba(0, 255, 136, 0.3));
+            transform: scale(1.1);
+        }
+
+        .game-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .players-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .player-info {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info.active {
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .player-color {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+
+        .timer-display.active {
+            color: #00ff88;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .timer-display.warning {
+            color: #ff4757;
+            border-color: #ff4757;
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .move-history {
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 1rem;
+            border: 1px solid #333;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .move-history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .move-history::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+
+        .move-history::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border-radius: 4px;
+        }
+
+        .move-item {
+            padding: 0.3rem 0;
+            color: #cccccc;
+            font-family: 'Courier New', monospace;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .move-item:last-child {
+            border-bottom: none;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .game-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .game-btn:hover::before {
+            left: 100%;
+        }
+
+        .game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-btn.resign {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .game-btn.resign:hover {
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        .game-status {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+
+        .game-status.check {
+            border-color: #ffd700;
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 237, 78, 0.1));
+            color: #ffd700;
+        }
+
+        .game-status.checkmate {
+            border-color: #ff4757;
+            background: linear-gradient(145deg, rgba(255, 71, 87, 0.2), rgba(255, 107, 122, 0.1));
+            color: #ff6b7a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #cccccc;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #333;
+            border-top: 3px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .message.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .message.error {
+            background: linear-gradient(145deg, rgba(255, 71, 87, 0.2), rgba(255, 107, 122, 0.1));
+            color: #ff6b7a;
+            border: 2px solid #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+        }
+
+        .message.success {
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 255, 0.1));
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .back-to-bracket {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: white;
+            border: 2px solid #333;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-to-bracket:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .chess-game-area {
+                flex: none;
+                width: 100%;
+                max-width: 900px;
+            }
+
+            .chess-container {
+                flex-direction: column;
+            }
+
+            .chess-board-section {
+                flex: none;
+                align-self: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .board {
+                grid-template-columns: repeat(8, 45px);
+                grid-template-rows: repeat(8, 45px);
+            }
+
+            .square {
+                font-size: 1.5rem;
+            }
+
+            .chess-board-section {
+                flex: none;
+            }
+
+            .game-controls {
+                flex-direction: column;
+            }
+
+            .bracket-rounds {
+                gap: 2rem;
+            }
+
+            .bracket-round {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">♔ MSI Chess Tournament</div>
+        <div class="user-info" id="userInfo">
+            <span>Angemeldet als:</span>
+            <span class="wallet-address" id="walletAddress"></span>
+            <button class="connect-button" onclick="disconnect()">Abmelden</button>
+        </div>
+        <button class="connect-button" id="connectButton" onclick="connectWallet()">
+            <span>🦊</span>
+            Mit MetaMask verbinden
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Tournament Info & Bracket -->
+        <div class="tournament-info" id="tournamentInfo">
+            <div class="tournament-status">
+                <h1 class="tournament-title" id="tournamentTitle">Chess Tournament</h1>
+                <div class="tournament-stats">
+                    <span>Teilnehmer: <strong id="participantCount">-</strong></span>
+                    <span>Runde: <strong id="currentRound">-</strong></span>
+                    <span>Status: <strong id="tournamentStatus">-</strong></span>
+                </div>
+            </div>
+
+            <div class="message" id="messageContainer"></div>
+
+            <div class="tournament-bracket">
+                <div id="bracketContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Lade Turnierdaten...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chess Game Area -->
+        <div class="chess-game-area" id="chessGameArea">
+            <button class="back-to-bracket" onclick="showBracket()">
+                ← Zurück zum Bracket
+            </button>
+            
+            <div class="chess-container">
+                <div class="chess-board-section">
+                    <div class="board" id="chessBoard"></div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="players-info">
+                        <div class="player-info" id="whitePlayerInfo">
+                            <div>
+                                <div class="player-name" id="whitePlayerName">Weiß</div>
+                                <div class="player-color">Spielt Weiß</div>
+                            </div>
+                            <div class="timer-display" id="whiteTimer">10:00</div>
+                        </div>
+                        
+                        <div class="player-info" id="blackPlayerInfo">
+                            <div>
+                                <div class="player-name" id="blackPlayerName">Schwarz</div>
+                                <div class="player-color">Spielt Schwarz</div>
+                            </div>
+                            <div class="timer-display" id="blackTimer">10:00</div>
+                        </div>
+                    </div>
+
+                    <div class="game-status" id="gameStatus">
+                        Warte auf Spielbeginn...
+                    </div>
+
+                    <div class="game-controls" id="gameControls">
+                        <button class="game-btn resign" onclick="resignGame()">
+                            Aufgeben
+                        </button>
+                    </div>
+
+                    <div class="move-history" id="moveHistory">
+                        <div class="move-item">Spiel bereit...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let tournamentData = null;
+        let chessGame = null;
+        let gameTimer = null;
+        let currentMatch = null;
+        let refreshInterval = null;
+
+        // MetaMask check
+        function isMetaMaskInstalled() {
+            return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+        }
+		
+		class ChessGame {
+    constructor() {
+        this.board = this.initializeBoard();
+        this.currentPlayer = 'white';
+        this.selectedSquare = null;
+        this.moveHistory = [];
+        this.gameState = 'playing';
+        this.boardElement = document.getElementById('chessBoard');
+        this.enPassantTarget = null;
+        this.castlingRights = {
+            whiteKingSide: true,
+            whiteQueenSide: true,
+            blackKingSide: true,
+            blackQueenSide: true
+        };
+        this.kingPositions = {white: {row: 7, col: 4}, black: {row: 0, col: 4}};
+        this.initializeBoard();
+    }
+
+    initializeBoard() {
+        const board = Array(8).fill(null).map(() => Array(8).fill(null));
+        
+        // Schwarze Figuren (Reihe 0 und 1)
+        board[0] = ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'];
+        board[1] = Array(8).fill('♟');
+        
+        // Weiße Figuren (Reihe 6 und 7)
+        board[6] = Array(8).fill('♙');
+        board[7] = ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
+        
+        this.renderBoard();
+        return board;
+    }
+
+    renderBoard() {
+        if (!this.boardElement) return;
+        
+        this.boardElement.innerHTML = '';
+        
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const square = document.createElement('div');
+                square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                square.dataset.row = row;
+                square.dataset.col = col;
+                
+                const piece = this.board[row][col];
+                if (piece) {
+                    const pieceElement = document.createElement('span');
+                    pieceElement.className = 'piece';
+                    pieceElement.textContent = piece;
+                    square.appendChild(pieceElement);
+                }
+                
+                square.addEventListener('click', (e) => this.handleSquareClick(e));
+                this.boardElement.appendChild(square);
+            }
+        }
+    }
+
+    handleSquareClick(event) {
+        if (this.gameState !== 'playing') return;
+        
+        const row = parseInt(event.currentTarget.dataset.row);
+        const col = parseInt(event.currentTarget.dataset.col);
+        const clickedSquare = {row, col};
+        
+        if (this.selectedSquare) {
+            if (this.selectedSquare.row === row && this.selectedSquare.col === col) {
+                // Deselect
+                this.clearHighlights();
+                this.selectedSquare = null;
+                return;
+            }
+            
+            if (this.isValidMove(this.selectedSquare, clickedSquare)) {
+                this.makeMove(this.selectedSquare, clickedSquare);
+                this.selectedSquare = null;
+                this.clearHighlights();
+                this.switchPlayer();
+                this.checkGameState();
+                this.renderBoard();
+                this.playMoveSound();
+            } else {
+                this.clearHighlights();
+                this.selectedSquare = null;
+            }
+        } else {
+            const piece = this.board[row][col];
+            if (piece && this.isPieceOwnedByPlayer(piece, this.currentPlayer)) {
+                this.selectedSquare = clickedSquare;
+                this.highlightSquare(row, col);
+                this.highlightValidMoves(clickedSquare);
+            }
+        }
+    }
+
+    isPieceOwnedByPlayer(piece, player) {
+        const whitePieces = ['♔', '♕', '♖', '♗', '♘', '♙'];
+        const blackPieces = ['♚', '♛', '♜', '♝', '♞', '♟'];
+        
+        if (player === 'white') {
+            return whitePieces.includes(piece);
+        } else {
+            return blackPieces.includes(piece);
+        }
+    }
+
+    isValidMove(from, to) {
+        const piece = this.board[from.row][from.col];
+        if (!piece) return false;
+        
+        const targetPiece = this.board[to.row][to.col];
+        
+        // Can't capture own pieces
+        if (targetPiece && this.isPieceOwnedByPlayer(targetPiece, this.currentPlayer)) {
+            return false;
+        }
+        
+        // Check piece-specific movement rules
+        if (!this.isPieceMovementValid(piece, from, to)) {
+            return false;
+        }
+        
+        // Check if path is clear (except for knights)
+        if (piece !== '♘' && piece !== '♞' && !this.isPathClear(from, to)) {
+            return false;
+        }
+        
+        // Simulate move and check if it leaves king in check
+        return !this.wouldMoveLeaveKingInCheck(from, to);
+    }
+
+    isPieceMovementValid(piece, from, to) {
+        const rowDiff = Math.abs(to.row - from.row);
+        const colDiff = Math.abs(to.col - from.col);
+        const rowDir = to.row > from.row ? 1 : to.row < from.row ? -1 : 0;
+        const colDir = to.col > from.col ? 1 : to.col < from.col ? -1 : 0;
+        
+        switch (piece) {
+            case '♙': // White pawn
+                return this.isValidPawnMove(from, to, 'white');
+            case '♟': // Black pawn
+                return this.isValidPawnMove(from, to, 'black');
+            case '♖': case '♜': // Rook
+                return (rowDiff === 0 || colDiff === 0);
+            case '♗': case '♝': // Bishop
+                return (rowDiff === colDiff);
+            case '♘': case '♞': // Knight
+                return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+            case '♕': case '♛': // Queen
+                return (rowDiff === 0 || colDiff === 0 || rowDiff === colDiff);
+            case '♔': case '♚': // King
+                return (rowDiff <= 1 && colDiff <= 1) || this.isCastlingMove(from, to);
+            default:
+                return false;
+        }
+    }
+
+    isValidPawnMove(from, to, color) {
+        const direction = color === 'white' ? -1 : 1;
+        const startRow = color === 'white' ? 6 : 1;
+        const rowDiff = to.row - from.row;
+        const colDiff = Math.abs(to.col - from.col);
+        
+        // Forward move
+        if (colDiff === 0) {
+            if (this.board[to.row][to.col]) return false; // Blocked
+            if (rowDiff === direction) return true; // One square
+            if (from.row === startRow && rowDiff === 2 * direction) return true; // Two squares from start
+        }
+        
+        // Diagonal capture
+        if (colDiff === 1 && rowDiff === direction) {
+            return this.board[to.row][to.col] !== null || this.isEnPassantCapture(from, to);
+        }
+        
+        return false;
+    }
+
+    isEnPassantCapture(from, to) {
+        return this.enPassantTarget && 
+               this.enPassantTarget.row === to.row && 
+               this.enPassantTarget.col === to.col;
+    }
+
+    isCastlingMove(from, to) {
+        const piece = this.board[from.row][from.col];
+        const isWhiteKing = piece === '♔';
+        const isBlackKing = piece === '♚';
+        
+        if (!isWhiteKing && !isBlackKing) return false;
+        
+        const row = from.row;
+        const colDiff = to.col - from.col;
+        
+        // King side castling
+        if (colDiff === 2) {
+            const canCastle = isWhiteKing ? this.castlingRights.whiteKingSide : this.castlingRights.blackKingSide;
+            return canCastle && this.board[row][5] === null && this.board[row][6] === null &&
+                   !this.isSquareUnderAttack({row, col: 4}, this.currentPlayer) &&
+                   !this.isSquareUnderAttack({row, col: 5}, this.currentPlayer) &&
+                   !this.isSquareUnderAttack({row, col: 6}, this.currentPlayer);
+        }
+        
+        // Queen side castling
+        if (colDiff === -2) {
+            const canCastle = isWhiteKing ? this.castlingRights.whiteQueenSide : this.castlingRights.blackQueenSide;
+            return canCastle && this.board[row][1] === null && this.board[row][2] === null && this.board[row][3] === null &&
+                   !this.isSquareUnderAttack({row, col: 4}, this.currentPlayer) &&
+                   !this.isSquareUnderAttack({row, col: 3}, this.currentPlayer) &&
+                   !this.isSquareUnderAttack({row, col: 2}, this.currentPlayer);
+        }
+        
+        return false;
+    }
+
+    isPathClear(from, to) {
+        const rowDir = to.row > from.row ? 1 : to.row < from.row ? -1 : 0;
+        const colDir = to.col > from.col ? 1 : to.col < from.col ? -1 : 0;
+        
+        let currentRow = from.row + rowDir;
+        let currentCol = from.col + colDir;
+        
+        while (currentRow !== to.row || currentCol !== to.col) {
+            if (this.board[currentRow][currentCol] !== null) {
+                return false;
+            }
+            currentRow += rowDir;
+            currentCol += colDir;
+        }
+        
+        return true;
+    }
+
+    makeMove(from, to) {
+        const piece = this.board[from.row][from.col];
+        const capturedPiece = this.board[to.row][to.col];
+        
+        // Handle en passant capture
+        if (this.isEnPassantCapture(from, to)) {
+            const capturedPawnRow = this.currentPlayer === 'white' ? to.row + 1 : to.row - 1;
+            this.board[capturedPawnRow][to.col] = null;
+        }
+        
+        // Handle castling
+        if (this.isCastlingMove(from, to)) {
+            const row = from.row;
+            const colDiff = to.col - from.col;
+            
+            if (colDiff === 2) { // King side
+                this.board[row][5] = this.board[row][7];
+                this.board[row][7] = null;
+            } else { // Queen side
+                this.board[row][3] = this.board[row][0];
+                this.board[row][0] = null;
+            }
+        }
+        
+        // Make the move
+        this.board[to.row][to.col] = piece;
+        this.board[from.row][from.col] = null;
+        
+        // Update king position
+        if (piece === '♔') this.kingPositions.white = {row: to.row, col: to.col};
+        if (piece === '♚') this.kingPositions.black = {row: to.row, col: to.col};
+        
+        // Update castling rights
+        this.updateCastlingRights(piece, from);
+        
+        // Handle en passant target
+        this.updateEnPassantTarget(piece, from, to);
+        
+        // Handle pawn promotion
+        this.handlePawnPromotion(piece, to);
+        
+        // Add to move history
+        this.moveHistory.push({
+            from: {...from},
+            to: {...to},
+            piece: piece,
+            capturedPiece: capturedPiece,
+            notation: this.getMoveNotation(piece, from, to, capturedPiece)
+        });
+        
+        this.updateMoveHistory();
+    }
+
+    updateCastlingRights(piece, from) {
+        if (piece === '♔') {
+            this.castlingRights.whiteKingSide = false;
+            this.castlingRights.whiteQueenSide = false;
+        } else if (piece === '♚') {
+            this.castlingRights.blackKingSide = false;
+            this.castlingRights.blackQueenSide = false;
+        } else if (piece === '♖') {
+            if (from.row === 7 && from.col === 0) this.castlingRights.whiteQueenSide = false;
+            if (from.row === 7 && from.col === 7) this.castlingRights.whiteKingSide = false;
+        } else if (piece === '♜') {
+            if (from.row === 0 && from.col === 0) this.castlingRights.blackQueenSide = false;
+            if (from.row === 0 && from.col === 7) this.castlingRights.blackKingSide = false;
+        }
+    }
+
+    updateEnPassantTarget(piece, from, to) {
+        this.enPassantTarget = null;
+        
+        if ((piece === '♙' || piece === '♟') && Math.abs(to.row - from.row) === 2) {
+            this.enPassantTarget = {
+                row: (from.row + to.row) / 2,
+                col: to.col
+            };
+        }
+    }
+
+    handlePawnPromotion(piece, to) {
+        if ((piece === '♙' && to.row === 0) || (piece === '♟' && to.row === 7)) {
+            // Auto-promote to queen for simplicity
+            this.board[to.row][to.col] = piece === '♙' ? '♕' : '♛';
+        }
+    }
+
+    switchPlayer() {
+        this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
+    }
+
+    checkGameState() {
+        const kingInCheck = this.isKingInCheck(this.currentPlayer);
+        const hasValidMoves = this.hasValidMoves(this.currentPlayer);
+        
+        if (kingInCheck) {
+            if (!hasValidMoves) {
+                this.gameState = 'checkmate';
+                this.endGame('checkmate', this.currentPlayer === 'white' ? 'black' : 'white');
+            } else {
+                this.gameState = 'check';
+                this.highlightKingInCheck();
+            }
+        } else if (!hasValidMoves) {
+            this.gameState = 'stalemate';
+            this.endGame('stalemate', null);
+        } else {
+            this.gameState = 'playing';
+        }
+    }
+
+    isKingInCheck(player) {
+        const kingPos = this.kingPositions[player];
+        return this.isSquareUnderAttack(kingPos, player);
+    }
+
+    isSquareUnderAttack(square, defendingPlayer) {
+        const attackingPlayer = defendingPlayer === 'white' ? 'black' : 'white';
+        
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const piece = this.board[row][col];
+                if (piece && this.isPieceOwnedByPlayer(piece, attackingPlayer)) {
+                    if (this.canPieceAttackSquare(piece, {row, col}, square)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    canPieceAttackSquare(piece, from, target) {
+        if (this.isPieceMovementValid(piece, from, target)) {
+            if (piece !== '♘' && piece !== '♞') {
+                return this.isPathClear(from, target);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    hasValidMoves(player) {
+        for (let fromRow = 0; fromRow < 8; fromRow++) {
+            for (let fromCol = 0; fromCol < 8; fromCol++) {
+                const piece = this.board[fromRow][fromCol];
+                if (piece && this.isPieceOwnedByPlayer(piece, player)) {
+                    for (let toRow = 0; toRow < 8; toRow++) {
+                        for (let toCol = 0; toCol < 8; toCol++) {
+                            if (this.isValidMove({row: fromRow, col: fromCol}, {row: toRow, col: toCol})) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    wouldMoveLeaveKingInCheck(from, to) {
+        // Simulate the move
+        const originalPiece = this.board[to.row][to.col];
+        const movingPiece = this.board[from.row][from.col];
+        
+        this.board[to.row][to.col] = movingPiece;
+        this.board[from.row][from.col] = null;
+        
+        // Update king position if king moved
+        let originalKingPos = null;
+        if (movingPiece === '♔') {
+            originalKingPos = {...this.kingPositions.white};
+            this.kingPositions.white = {row: to.row, col: to.col};
+        } else if (movingPiece === '♚') {
+            originalKingPos = {...this.kingPositions.black};
+            this.kingPositions.black = {row: to.row, col: to.col};
+        }
+        
+        const kingInCheck = this.isKingInCheck(this.currentPlayer);
+        
+        // Restore board state
+        this.board[from.row][from.col] = movingPiece;
+        this.board[to.row][to.col] = originalPiece;
+        
+        if (originalKingPos) {
+            if (movingPiece === '♔') {
+                this.kingPositions.white = originalKingPos;
+            } else {
+                this.kingPositions.black = originalKingPos;
+            }
+        }
+        
+        return kingInCheck;
+    }
+
+    highlightSquare(row, col) {
+        const square = this.boardElement.children[row * 8 + col];
+        square.classList.add('selected');
+    }
+
+    highlightValidMoves(from) {
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                if (this.isValidMove(from, {row, col})) {
+                    const square = this.boardElement.children[row * 8 + col];
+                    square.classList.add('valid-move');
+                }
+            }
+        }
+    }
+
+    highlightKingInCheck() {
+        const kingPos = this.kingPositions[this.currentPlayer];
+        const square = this.boardElement.children[kingPos.row * 8 + kingPos.col];
+        square.classList.add('in-check');
+    }
+
+    clearHighlights() {
+        const squares = this.boardElement.querySelectorAll('.square');
+        squares.forEach(square => {
+            square.classList.remove('selected', 'valid-move', 'in-check');
+        });
+    }
+
+    getMoveNotation(piece, from, to, capturedPiece) {
+        const files = 'abcdefgh';
+        const fromSquare = files[from.col] + (8 - from.row);
+        const toSquare = files[to.col] + (8 - to.row);
+        
+        let notation = '';
+        
+        if (piece !== '♙' && piece !== '♟') {
+            const pieceSymbols = {'♔': 'K', '♕': 'Q', '♖': 'R', '♗': 'B', '♘': 'N', '♚': 'K', '♛': 'Q', '♜': 'R', '♝': 'B', '♞': 'N'};
+            notation += pieceSymbols[piece];
+        }
+        
+        if (capturedPiece) {
+            if (piece === '♙' || piece === '♟') notation += files[from.col];
+            notation += 'x';
+        }
+        
+        notation += toSquare;
+        
+        return notation;
+    }
+
+    updateMoveHistory() {
+        const historyElement = document.getElementById('moveHistory');
+        if (!historyElement) return;
+        
+        historyElement.innerHTML = '';
+        
+        for (let i = 0; i < this.moveHistory.length; i += 2) {
+            const moveNumber = Math.floor(i / 2) + 1;
+            const whiteMove = this.moveHistory[i];
+            const blackMove = this.moveHistory[i + 1];
+            
+            const moveItem = document.createElement('div');
+            moveItem.className = 'move-item';
+            moveItem.textContent = `${moveNumber}. ${whiteMove.notation}${blackMove ? ' ' + blackMove.notation : ''}`;
+            historyElement.appendChild(moveItem);
+        }
+        
+        historyElement.scrollTop = historyElement.scrollHeight;
+    }
+
+    endGame(result, winner) {
+        this.gameState = 'finished';
+        console.log(`Game ended: ${result}, Winner: ${winner}`);
+    }
+
+    playMoveSound() {
+        // Audio feedback could be implemented here
+    }
+
+    reset() {
+        this.board = this.initializeBoard();
+        this.currentPlayer = 'white';
+        this.selectedSquare = null;
+        this.moveHistory = [];
+        this.gameState = 'playing';
+        this.enPassantTarget = null;
+        this.castlingRights = {
+            whiteKingSide: true,
+            whiteQueenSide: true,
+            blackKingSide: true,
+            blackQueenSide: true
+        };
+        this.kingPositions = {white: {row: 7, col: 4}, black: {row: 0, col: 4}};
+        this.clearHighlights();
+        
+        const historyElement = document.getElementById('moveHistory');
+        if (historyElement) {
+            historyElement.innerHTML = '<div class="move-item">Neues Spiel gestartet...</div>';
+        }
+    }
+}
+
+        // Timer class for chess games
+        class ChessTimer {
+            constructor() {
+                this.whiteTime = 600; // 10 minutes in seconds
+                this.blackTime = 600;
+                this.isRunning = false;
+                this.currentPlayer = 'white';
+                this.timerInterval = null;
+            }
+
+            start() {
+                this.isRunning = true;
+                this.timerInterval = setInterval(() => {
+                    if (this.currentPlayer === 'white') {
+                        this.whiteTime--;
+                        this.updateDisplay('white');
+                        if (this.whiteTime <= 0) {
+                            this.timeUp('white');
+                        }
+                    } else {
+                        this.blackTime--;
+                        this.updateDisplay('black');
+                        if (this.blackTime <= 0) {
+                            this.timeUp('black');
+                        }
+                    }
+                }, 1000);
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            switchPlayer(newPlayer) {
+                this.currentPlayer = newPlayer;
+                this.updateTimerDisplay();
+            }
+
+            updateTimerDisplay() {
+                const whiteInfo = document.getElementById('whitePlayerInfo');
+                const blackInfo = document.getElementById('blackPlayerInfo');
+                const whiteTimer = document.getElementById('whiteTimer');
+                const blackTimer = document.getElementById('blackTimer');
+                
+                if (whiteInfo && blackInfo) {
+                    whiteInfo.classList.toggle('active', this.currentPlayer === 'white');
+                    blackInfo.classList.toggle('active', this.currentPlayer === 'black');
+                }
+                
+                if (whiteTimer && blackTimer) {
+                    whiteTimer.classList.toggle('active', this.currentPlayer === 'white');
+                    blackTimer.classList.toggle('active', this.currentPlayer === 'black');
+                }
+            }
+
+            updateDisplay(player) {
+                const time = player === 'white' ? this.whiteTime : this.blackTime;
+                const timerElement = document.getElementById(`${player}Timer`);
+                
+                if (timerElement) {
+                    const minutes = Math.floor(time / 60);
+                    const seconds = time % 60;
+                    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Warning when under 1 minute
+                    if (time <= 60) {
+                        timerElement.classList.add('warning');
+                    } else {
+                        timerElement.classList.remove('warning');
+                    }
+                }
+            }
+
+            timeUp(player) {
+                this.pause();
+                const winner = player === 'white' ? 'black' : 'white';
+                if (chessGame) {
+                    chessGame.endGame('timeout', winner);
+                }
+            }
+
+            reset() {
+                this.pause();
+                this.whiteTime = 600;
+                this.blackTime = 600;
+                this.currentPlayer = 'white';
+                this.updateDisplay('white');
+                this.updateDisplay('black');
+                this.updateTimerDisplay();
+            }
+        }
+
+
+        class TournamentChessGame extends ChessGame {
+    constructor(matchData, playerColor) {
+        super();
+        this.matchData = matchData;
+        this.playerColor = playerColor;
+        this.opponentColor = playerColor === 'white' ? 'black' : 'white';
+        this.gameStarted = false;
+        this.timer = new ChessTimer();
+        this.initializeTournamentUI();
+    }
+
+    initializeTournamentUI() {
+        const whitePlayerName = document.getElementById('whitePlayerName');
+        const blackPlayerName = document.getElementById('blackPlayerName');
+        
+        if (this.playerColor === 'white') {
+            whitePlayerName.textContent = 'Du';
+            blackPlayerName.textContent = this.matchData.player2.platformUsername || this.matchData.player2.username;
+        } else {
+            whitePlayerName.textContent = this.matchData.player1.platformUsername || this.matchData.player1.username;
+            blackPlayerName.textContent = 'Du';
+        }
+
+        this.timer.start();
+        this.updateGameStatus('Spiel läuft...');
+    }
+
+    handleSquareClick(event) {
+        if (!this.gameStarted || this.gameState !== 'playing') return;
+        
+        if (this.currentPlayer !== this.playerColor) {
+            this.showTemporaryMessage('Warte auf deinen Zug!');
+            return;
+        }
+
+        super.handleSquareClick(event);
+    }
+
+    makeMove(from, to) {
+        super.makeMove(from, to);
+        this.sendMoveToOpponent(from, to);
+    }
+
+    sendMoveToOpponent(from, to) {
+        console.log(`Move sent: ${from.row}${from.col} to ${to.row}${to.col}`);
+        
+        if (this.currentPlayer === this.opponentColor) {
+            setTimeout(() => {
+                this.simulateOpponentMove();
+            }, 1000 + Math.random() * 2000);
+        }
+    }
+
+    simulateOpponentMove() {
+        const validMoves = this.getAllValidMoves(this.currentPlayer);
+        if (validMoves.length > 0) {
+            const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+            this.selectedSquare = randomMove.from;
+            this.makeMove(randomMove.from, randomMove.to);
+            this.selectedSquare = null;
+            this.switchPlayer();
+            this.checkGameState();
+            this.renderBoard();
+            this.playMoveSound();
+        }
+    }
+
+    getAllValidMoves(player) {
+        const moves = [];
+        for (let fromRow = 0; fromRow < 8; fromRow++) {
+            for (let fromCol = 0; fromCol < 8; fromCol++) {
+                const piece = this.board[fromRow][fromCol];
+                if (piece && this.isPieceOwnedByPlayer(piece, player)) {
+                    for (let toRow = 0; toRow < 8; toRow++) {
+                        for (let toCol = 0; toCol < 8; toCol++) {
+                            if (this.isValidMove({row: fromRow, col: fromCol}, {row: toRow, col: toCol})) {
+                                moves.push({
+                                    from: {row: fromRow, col: fromCol},
+                                    to: {row: toRow, col: toCol}
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return moves;
+    }
+
+    endGame(result, winner) {
+        this.gameState = 'finished';
+        this.timer.pause();
+        
+        let title, message;
+        if (result === 'checkmate') {
+            title = 'Schachmatt!';
+            message = winner === this.playerColor ? 'Du hast gewonnen!' : 'Du hast verloren!';
+        } else if (result === 'timeout') {
+            title = 'Zeit abgelaufen!';
+            message = winner === this.playerColor ? 'Du gewinnst durch Zeitüberschreitung!' : 'Du verlierst durch Zeitüberschreitung!';
+        } else if (result === 'resignation') {
+            title = 'Aufgabe!';
+            message = winner === this.playerColor ? 'Dein Gegner hat aufgegeben!' : 'Du hast aufgegeben!';
+        }
+
+        this.showGameEndMessage(title, message);
+        this.submitGameResult(winner);
+    }
+
+    showGameEndMessage(title, message) {
+        alert(`${title}\n\n${message}`);
+    }
+
+    async submitGameResult(winner) {
+        try {
+            const gameResult = {
+                matchId: this.matchData.id,
+                winner: winner,
+                gameData: {
+                    moves: this.moveHistory,
+                    duration: 600 - (winner === 'white' ? this.timer.whiteTime : this.timer.blackTime),
+                    endReason: this.gameState
+                }
+            };
+
+            const response = await fetch(`https://msi-38e5.onrender.com/tournament/submit-game-result`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gameResult)
+            });
+
+            if (response.ok) {
+                this.showMessage('Spielergebnis erfolgreich übermittelt!', 'success');
+            } else {
+                this.showMessage('Fehler beim Übermitteln des Ergebnisses.', 'error');
+            }
+        } catch (error) {
+            console.error('Error submitting game result:', error);
+            this.showMessage('Netzwerkfehler beim Übermitteln des Ergebnisses.', 'error');
+        }
+    }
+
+    updateGameStatus(status) {
+        const statusElement = document.getElementById('gameStatus');
+        if (statusElement) {
+            statusElement.textContent = status;
+        }
+    }
+
+    showTemporaryMessage(message, duration = 3000) {
+        this.updateGameStatus(message);
+        setTimeout(() => {
+            this.updateGameStatus(this.gameState === 'playing' ? 'Spiel läuft...' : this.gameState);
+        }, duration);
+    }
+
+    showMessage(text, type = 'info') {
+        const messageContainer = document.getElementById('messageContainer');
+        if (messageContainer) {
+            messageContainer.textContent = text;
+            messageContainer.className = `message visible ${type}`;
+            
+            setTimeout(() => {
+                messageContainer.classList.remove('visible');
+            }, 5000);
+        }
+    }
+
+    startNewGame() {
+        this.gameStarted = true;
+        this.reset();
+        this.timer.reset();
+        this.timer.start();
+        this.updateGameStatus('Spiel gestartet! Du spielst als ' + (this.playerColor === 'white' ? 'Weiß' : 'Schwarz'));
+    }
+}
+
+            async submitGameResult(winner) {
+                try {
+                    const gameResult = {
+                        matchId: this.matchData.id,
+                        winner: winner,
+                        gameData: {
+                            moves: this.moveHistory,
+                            duration: 600 - (winner === 'white' ? this.timer.whiteTime : this.timer.blackTime),
+                            endReason: this.gameState
+                        }
+                    };
+
+                    // Submit to tournament system
+                    const response = await fetch(`https://msi-38e5.onrender.com/tournament/submit-game-result`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(gameResult)
+                    });
+
+                    if (response.ok) {
+                        this.showMessage('Spielergebnis erfolgreich übermittelt!', 'success');
+                    } else {
+                        this.showMessage('Fehler beim Übermitteln des Ergebnisses.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error submitting game result:', error);
+                    this.showMessage('Netzwerkfehler beim Übermitteln des Ergebnisses.', 'error');
+                }
+            }
+
+            updateGameStatus(status) {
+                const statusElement = document.getElementById('gameStatus');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                }
+            }
+
+            showTemporaryMessage(message, duration = 3000) {
+                this.updateGameStatus(message);
+                setTimeout(() => {
+                    this.updateGameStatus(this.gameState === 'playing' ? 'Spiel läuft...' : this.gameState);
+                }, duration);
+            }
+
+            showMessage(text, type = 'info') {
+                const messageContainer = document.getElementById('messageContainer');
+                if (messageContainer) {
+                    messageContainer.textContent = text;
+                    messageContainer.className = `message visible ${type}`;
+                    
+                    setTimeout(() => {
+                        messageContainer.classList.remove('visible');
+                    }, 5000);
+                }
+            }
+
+            startNewGame() {
+                this.gameStarted = true;
+                this.reset();
+                this.timer.reset();
+                this.timer.start();
+                this.updateGameStatus('Spiel gestartet! Du spielst als ' + (this.playerColor === 'white' ? 'Weiß' : 'Schwarz'));
+            }
+        }
+
+        // Global variables
+        let currentUser = null;
+        let tournamentData = null;
+        let chessGame = null;
+        let gameTimer = null;
+        let currentMatch = null;
+
+        // Initialize page
+        async function initializePage() {
+            await checkConnection();
+            await loadTournamentData();
+            
+            if (currentUser && currentMatch) {
+                startChessGame();
+            }
+        }
+
+        async function checkConnection() {
+            if (isMetaMaskInstalled()) {
+                try {
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_accounts'
+                    });
+                    
+                    if (accounts.length > 0) {
+                        const walletAddress = accounts[0];
+                        const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                        
+                        if (response.ok) {
+                            currentUser = await response.json();
+                            updateConnectedUI();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking connection:', error);
+                }
+            }
+        }
+
+        function updateConnectedUI() {
+            document.getElementById('connectButton').style.display = 'none';
+            document.getElementById('userInfo').classList.add('visible');
+            document.getElementById('walletAddress').textContent = formatAddress(currentUser.walletAddress);
+        }
+
+        function formatAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        }
+
+        async function loadTournamentData() {
+            try {
+                const response = await fetch('https://msi-38e5.onrender.com/games/chess/tournaments/active');
+                
+                if (response.ok) {
+                    tournamentData = await response.json();
+                    findCurrentMatch();
+                    updateTournamentInfo();
+                } else {
+                    showMessage('Kein aktives Schach-Turnier gefunden.', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading tournament data:', error);
+                showMessage('Fehler beim Laden der Turnierdaten.', 'error');
+            }
+        }
+
+        function findCurrentMatch() {
+            if (!currentUser || !tournamentData || !tournamentData.bracket) return;
+
+            // Find current match for the user
+            for (const round of tournamentData.bracket.rounds) {
+                for (const match of round) {
+                    if (match.status === 'pending' && 
+                        (match.player1.walletAddress === currentUser.walletAddress || 
+                         match.player2.walletAddress === currentUser.walletAddress)) {
+                        currentMatch = match;
+                        return;
+                    }
+                }
+            }
+        }
+
+        function updateTournamentInfo() {
+            const titleElement = document.getElementById('tournamentTitle');
+            const participantCount = document.getElementById('participantCount');
+            const currentRound = document.getElementById('currentRound');
+            const tournamentStatus = document.getElementById('tournamentStatus');
+
+            if (tournamentData) {
+                titleElement.textContent = tournamentData.name || 'Schach Turnier';
+                participantCount.textContent = tournamentData.participants?.length || 0;
+                currentRound.textContent = tournamentData.bracket?.currentRound || 1;
+                tournamentStatus.textContent = getStatusText(tournamentData.status);
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'registration': return 'Registrierung';
+                case 'started': return 'Läuft';
+                case 'finished': return 'Beendet';
+                default: return 'Unbekannt';
+            }
+        }
+
+        function startChessGame() {
+            if (!currentMatch) {
+                showMessage('Kein aktives Spiel gefunden.', 'error');
+                return;
+            }
+
+            const playerColor = currentMatch.player1.walletAddress === currentUser.walletAddress ? 'white' : 'black';
+            chessGame = new TournamentChessGame(currentMatch, playerColor);
+            
+            // Show game area
+            document.getElementById('chessGameArea').classList.add('active');
+            document.getElementById('tournamentInfo').style.display = 'none';
+            
+            chessGame.startNewGame();
+        }
+
+        function showBracket() {
+            document.getElementById('chessGameArea').classList.remove('active');
+            document.getElementById('tournamentInfo').style.display = 'block';
+            displayBracket();
+        }
+
+        function displayBracket() {
+            const container = document.getElementById('bracketContainer');
+            
+            if (!tournamentData || !tournamentData.bracket) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: rgba(255,255,255,0.6); padding: 2rem;">
+                        Turnier noch nicht gestartet oder keine Bracket-Daten verfügbar.
+                    </div>
+                `;
+                return;
+            }
+
+            const bracket = tournamentData.bracket;
+            let html = '<div class="bracket-rounds">';
+            
+            bracket.rounds.forEach((round, roundIndex) => {
+                const roundNumber = roundIndex + 1;
+                const roundName = getRoundName(roundNumber, bracket.totalRounds);
+                
+                html += '<div class="bracket-round">';
+                html += `<div class="round-title">${roundName}</div>`;
+                
+                round.forEach(match => {
+                    const isMyMatch = currentUser && 
+                        (match.player1.walletAddress === currentUser.walletAddress || 
+                         match.player2.walletAddress === currentUser.walletAddress);
+                    const isCompleted = match.status === 'completed';
+                    
+                    html += `<div class="match-card ${isCompleted ? 'completed' : ''} ${isMyMatch ? 'active-match' : ''}">`;
+                    
+                    // Player 1
+                    const player1Classes = `player ${isCompleted && match.winner && match.winner.walletAddress === match.player1.walletAddress ? 'winner' : ''} ${isCompleted && match.winner && match.winner.walletAddress !== match.player1.walletAddress ? 'loser' : ''}`;
+                    html += `<div class="${player1Classes}">
+                        <span>${match.player1.platformUsername || match.player1.username}</span>
+                    </div>`;
+                    
+                    // Player 2
+                    const player2Classes = `player ${isCompleted && match.winner && match.winner.walletAddress === match.player2.walletAddress ? 'winner' : ''} ${isCompleted && match.winner && match.winner.walletAddress !== match.player2.walletAddress ? 'loser' : ''}`;
+                    html += `<div class="${player2Classes}">
+                        <span>${match.player2.platformUsername || match.player2.username}</span>
+                    </div>`;
+                    
+                    if (isMyMatch && !isCompleted) {
+                        html += `<button onclick="startChessGame()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: linear-gradient(45deg, #ffd700, #ffed4e); color: #0a0a0a; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Spiel starten</button>`;
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function getRoundName(roundNumber, totalRounds) {
+            const roundsFromEnd = totalRounds - roundNumber + 1;
+            switch (roundsFromEnd) {
+                case 1: return 'Finale';
+                case 2: return 'Halbfinale';
+                case 3: return 'Viertelfinale';
+                case 4: return 'Achtelfinale';
+                default: return `Runde ${roundNumber}`;
+            }
+        }
+
+        function resignGame() {
+            if (!chessGame || chessGame.gameState !== 'playing') {
+                showMessage('Kein aktives Spiel zum Aufgeben.', 'error');
+                return;
+            }
+
+            if (confirm('Möchtest du wirklich aufgeben?')) {
+                const winner = chessGame.playerColor === 'white' ? 'black' : 'white';
+                chessGame.endGame('resignation', winner);
+            }
+        }
+
+        function showMessage(text, type = 'info') {
+            const messageContainer = document.getElementById('messageContainer');
+            if (messageContainer) {
+                messageContainer.textContent = text;
+                messageContainer.className = `message visible ${type}`;
+                
+                setTimeout(() => {
+                    messageContainer.classList.remove('visible');
+                }, 5000);
+            }
+        }
+
+        function disconnect() {
+            currentUser = null;
+            document.getElementById('connectButton').style.display = 'block';
+            document.getElementById('userInfo').classList.remove('visible');
+            document.getElementById('chessGameArea').classList.remove('active');
+            document.getElementById('tournamentInfo').style.display = 'block';
+        }
+
+        async function connectWallet() {
+            if (!isMetaMaskInstalled()) {
+                showMessage('MetaMask ist nicht installiert.', 'error');
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    const walletAddress = accounts[0];
+                    const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                    
+                    if (response.ok) {
+                        currentUser = await response.json();
+                        updateConnectedUI();
+                        findCurrentMatch();
+                        showMessage(`Willkommen zurück, ${currentUser.platformUsername || currentUser.username}!`, 'success');
+                    } else {
+                        showMessage('Diese Wallet ist nicht registriert.', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                showMessage('Fehler beim Verbinden mit MetaMask.', 'error');
+            }
+        }
+
+        // Initialize page when loaded
+        window.addEventListener('load', initializePage);
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    disconnect();
+                } else {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

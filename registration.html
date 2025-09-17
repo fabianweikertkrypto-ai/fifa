@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnier Registrierung - MSI Tournament</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+                radial-gradient(1px 1px at 90px 40px, #00ccff, transparent),
+                radial-gradient(1px 1px at 200px 150px, #00ff88, transparent),
+                radial-gradient(2px 2px at 350px 80px, #00ccff, transparent);
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            animation: float 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 30px rgba(0, 204, 255, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 204, 255, 0.6); }
+        }
+
+        @keyframes sweep {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #333;
+            padding: 2rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, #00ccff, transparent);
+            animation: sweep 3s ease-in-out infinite;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            border: 1px solid #333;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .user-info.visible {
+            display: flex;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0a0a0a;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .wallet-short {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Courier New', monospace;
+        }
+
+        .disconnect-btn {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .disconnect-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .connect-section {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .connect-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #00ff88);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .connect-section:hover::before {
+            opacity: 0.3;
+        }
+
+        .metamask-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .connect-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .connect-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .connect-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .connect-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+        }
+
+        .connect-btn:hover::before {
+            left: 100%;
+        }
+
+        .filters-section {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .filters-section.visible {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .filter-select {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 0.8rem;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .tournaments-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite alternate;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tournaments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .tournament-card {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tournament-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .tournament-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: #00ff88;
+        }
+
+        .tournament-card:hover::before {
+            left: 100%;
+        }
+
+        .tournament-card.registered {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .tournament-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .tournament-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .game-badge {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #333;
+            color: #00ccff;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .game-icon {
+            font-size: 1.2rem;
+        }
+
+        .tournament-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-registration { background: #3b82f6; }
+        .status-started { background: #00ff88; }
+        .status-finished { background: #f59e0b; }
+
+        .tournament-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #00ccff;
+            font-weight: bold;
+        }
+
+        .tournament-description {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .participants-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .participants-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .participants-title {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .participants-count {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            color: #00ccff;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .participants-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .participant-tag {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .participant-tag.current-user {
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.2));
+            border-color: #00ff88;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .tournament-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .register-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #0a0a0a;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .register-btn:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .register-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .register-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .register-btn.registered {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .register-btn.registered:hover:not(:disabled) {
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: sweep 2s infinite;
+        }
+
+        .message.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .message.error {
+            background: linear-gradient(145deg, rgba(255, 71, 87, 0.2), rgba(255, 107, 122, 0.1));
+            color: #ff6b7a;
+            border: 2px solid #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+        }
+
+        .message.success {
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 255, 0.1));
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                position: static;
+                transform: none;
+                margin-top: 1rem;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header {
+                padding-bottom: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .tournaments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tournament-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .tournament-actions {
+                flex-direction: column;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏆 Turnier Registrierung</h1>
+        <p>Melden Sie sich für aktuelle MSI Turniere an</p>
+        
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <div class="user-details">
+                <div class="username" id="username">Unbekannt</div>
+                <div class="wallet-short" id="walletShort">0x0000...0000</div>
+            </div>
+            <button class="disconnect-btn" onclick="disconnect()">Abmelden</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Connect Section -->
+        <div class="connect-section" id="connectSection">
+            <div class="metamask-logo">🦊</div>
+            <h2 class="connect-title">MetaMask verbinden</h2>
+            <p class="connect-description">
+                Verbinden Sie Ihre MetaMask Wallet, um sich für Turniere zu registrieren. 
+                Sie müssen zuerst ein Profil erstellen, bevor Sie sich anmelden können.
+            </p>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">
+                <span>🔗</span>
+                Mit MetaMask verbinden
+            </button>
+        </div>
+
+        <!-- Message Container -->
+        <div class="message" id="messageContainer"></div>
+
+        <!-- Filters Section -->
+        <div class="filters-section" id="filtersSection">
+            <div class="filters-title">
+                <span>🔍</span>
+                Turniere filtern
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Spiel</label>
+                    <select class="filter-select" id="gameFilter" onchange="applyFilters()">
+                        <option value="">Alle Spiele</option>
+                        <option value="fifa">FIFA</option>
+                        <option value="cod">Call of Duty</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                        <option value="">Alle Status</option>
+                        <option value="registration">Registrierung offen</option>
+                        <option value="started">Läuft</option>
+                        <option value="finished">Beendet</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tournaments Section -->
+        <div class="tournaments-section">
+            <h2 class="section-title">
+                <span>🎮</span>
+                Verfügbare Turniere
+            </h2>
+            <div class="tournaments-grid" id="tournamentsGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Lade Turniere...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let allTournaments = [];
+        let filteredTournaments = [];
+
+        // MetaMask check
+        function isMetaMaskInstalled() {
+            return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+        }
+
+        // Format wallet address
+        function formatAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Get initial
+        function getInitial(username) {
+            return username ? username.charAt(0).toUpperCase() : '?';
+        }
+
+        // Show message
+        function showMessage(text, type = 'info') {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.textContent = text;
+            messageContainer.className = `message visible ${type}`;
+            
+            setTimeout(() => {
+                messageContainer.classList.remove('visible');
+            }, 5000);
+        }
+
+        // Connect wallet
+        async function connectWallet() {
+            if (!isMetaMaskInstalled()) {
+                showMessage('MetaMask ist nicht installiert. Bitte installieren Sie die Browser-Erweiterung.', 'error');
+                return;
+            }
+
+            try {
+                const connectBtn = document.getElementById('connectBtn');
+                const originalText = connectBtn.innerHTML;
+                connectBtn.innerHTML = '<span>⏳</span>Verbinde...';
+                connectBtn.disabled = true;
+
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    const walletAddress = accounts[0];
+                    
+                    // Check if user is registered
+                    const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                    
+                    if (response.ok) {
+                        currentUser = await response.json();
+                        updateUIAfterConnect();
+                        await loadTournaments();
+                        showMessage(`Willkommen zurück, ${currentUser.platformUsername || currentUser.username}!`, 'success');
+                    } else {
+                        showMessage('Diese Wallet ist nicht registriert. Bitte erstellen Sie zuerst ein Profil.', 'error');
+                        window.open('profile.html', '_blank');
+                    }
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                if (error.code === 4001) {
+                    showMessage('Verbindung wurde abgelehnt.', 'error');
+                } else {
+                    showMessage('Fehler beim Verbinden mit MetaMask.', 'error');
+                }
+            } finally {
+                const connectBtn = document.getElementById('connectBtn');
+                connectBtn.innerHTML = '<span>🔗</span>Mit MetaMask verbinden';
+                connectBtn.disabled = false;
+            }
+        }
+
+        // Update UI after connection
+        function updateUIAfterConnect() {
+            document.getElementById('connectSection').style.display = 'none';
+            document.getElementById('filtersSection').classList.add('visible');
+            document.getElementById('userInfo').classList.add('visible');
+            
+            document.getElementById('userAvatar').textContent = getInitial(currentUser.platformUsername || currentUser.username);
+            document.getElementById('username').textContent = currentUser.platformUsername || currentUser.username;
+            document.getElementById('walletShort').textContent = formatAddress(currentUser.walletAddress);
+        }
+
+        // Disconnect
+        function disconnect() {
+            currentUser = null;
+            document.getElementById('connectSection').style.display = 'block';
+            document.getElementById('filtersSection').classList.remove('visible');
+            document.getElementById('userInfo').classList.remove('visible');
+            displayTournaments();
+        }
+
+        // Load tournaments
+        async function loadTournaments() {
+            const tournamentsGrid = document.getElementById('tournamentsGrid');
+            
+            try {
+                const response = await fetch('https://msi-38e5.onrender.com/games');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const gamesData = await response.json();
+                allTournaments = [];
+                
+                // Collect all tournaments from all games
+                Object.entries(gamesData).forEach(([gameId, game]) => {
+                    if (game.tournaments) {
+                        Object.values(game.tournaments).forEach(tournament => {
+                            allTournaments.push({
+                                ...tournament,
+                                gameId: gameId,
+                                gameName: game.name,
+                                gameIcon: gameId === 'fifa' ? '⚽' : '🎯'
+                            });
+                        });
+                    }
+                });
+
+                // Sort tournaments by creation date (newest first)
+                allTournaments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                filteredTournaments = [...allTournaments];
+                displayTournaments();
+
+            } catch (error) {
+                console.error('Error loading tournaments:', error);
+                tournamentsGrid.innerHTML = `
+                    <div class="message error visible">
+                        <h3>Fehler beim Laden</h3>
+                        <p>Die Turnierdaten konnten nicht geladen werden.</p>
+                        <p><strong>Fehler:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const gameFilter = document.getElementById('gameFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            filteredTournaments = allTournaments.filter(tournament => {
+                const gameMatch = !gameFilter || tournament.gameId === gameFilter;
+                const statusMatch = !statusFilter || tournament.status === statusFilter;
+                return gameMatch && statusMatch;
+            });
+            
+            displayTournaments();
+        }
+
+        // Display tournaments
+        function displayTournaments() {
+            const tournamentsGrid = document.getElementById('tournamentsGrid');
+            
+            if (filteredTournaments.length === 0) {
+                tournamentsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🏆</div>
+                        <h3>Keine Turniere gefunden</h3>
+                        <p>Es sind keine Turniere verfügbar, die Ihren Filterkriterien entsprechen.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tournamentsHTML = filteredTournaments.map(tournament => {
+                const isRegistered = currentUser && tournament.participants.some(p => 
+                    p.walletAddress.toLowerCase() === currentUser.walletAddress.toLowerCase()
+                );
+                
+                const canRegister = tournament.status === 'registration' && currentUser && !isRegistered;
+                const canUnregister = tournament.status === 'registration' && currentUser && isRegistered;
+                
+                return `
+                    <div class="tournament-card ${isRegistered ? 'registered' : ''}">
+                        <div class="tournament-header">
+                            <h3 class="tournament-title">${tournament.name}</h3>
+                            <div class="game-badge">
+                                <span class="game-icon">${tournament.gameIcon}</span>
+                                ${tournament.gameName}
+                            </div>
+                        </div>
+                        
+                        <div class="tournament-status">
+                            <div class="status-dot status-${tournament.status}"></div>
+                            ${getStatusText(tournament.status)}
+                        </div>
+                        
+                        <div class="tournament-info">
+                            <div class="info-row">
+                                <span class="info-label">Erstellt:</span>
+                                <span class="info-value">${formatDate(tournament.createdAt)}</span>
+                            </div>
+                            ${tournament.startedAt ? `
+                                <div class="info-row">
+                                    <span class="info-label">Gestartet:</span>
+                                    <span class="info-value">${formatDate(tournament.startedAt)}</span>
+                                </div>
+                            ` : ''}
+                            ${tournament.finishedAt ? `
+                                <div class="info-row">
+                                    <span class="info-label">Beendet:</span>
+                                    <span class="info-value">${formatDate(tournament.finishedAt)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${tournament.description ? `
+                            <div class="tournament-description">
+                                ${tournament.description}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="participants-section">
+                            <div class="participants-header">
+                                <span class="participants-title">Teilnehmer</span>
+                                <span class="participants-count">${tournament.participants.length}</span>
+                            </div>
+                            ${tournament.participants.length > 0 ? `
+                                <div class="participants-list">
+                                    ${tournament.participants.slice(0, 8).map(participant => {
+                                        const isCurrentUser = currentUser && 
+                                            participant.walletAddress.toLowerCase() === currentUser.walletAddress.toLowerCase();
+                                        return `
+                                            <span class="participant-tag ${isCurrentUser ? 'current-user' : ''}">
+                                                ${participant.platformUsername || participant.username}
+                                            </span>
+                                        `;
+                                    }).join('')}
+                                    ${tournament.participants.length > 8 ? 
+                                        `<span class="participant-tag">+${tournament.participants.length - 8} weitere</span>` : ''
+                                    }
+                                </div>
+                            ` : '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 0.5rem;">Noch keine Teilnehmer</p>'}
+                        </div>
+                        
+                        <div class="tournament-actions">
+                            ${!currentUser ? `
+                                <button class="register-btn" disabled>
+                                    <span>🔒</span>
+                                    Wallet verbinden erforderlich
+                                </button>
+                            ` : canRegister ? `
+                                <button class="register-btn" onclick="registerForTournament('${tournament.gameId}', '${tournament.id}')">
+                                    <span>✅</span>
+                                    Registrieren
+                                </button>
+                            ` : canUnregister ? `
+                                <button class="register-btn registered" onclick="unregisterFromTournament('${tournament.gameId}', '${tournament.id}')">
+                                    <span>❌</span>
+                                    Abmelden
+                                </button>
+                            ` : tournament.status === 'started' ? `
+                                <button class="register-btn" disabled>
+                                    <span>🏃‍♂️</span>
+                                    Turnier läuft
+                                </button>
+                            ` : tournament.status === 'finished' ? `
+                                <button class="register-btn" disabled>
+                                    <span>🏁</span>
+                                    Turnier beendet
+                                </button>
+                            ` : `
+                                <button class="register-btn" disabled>
+                                    <span>🚫</span>
+                                    Nicht verfügbar
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            tournamentsGrid.innerHTML = tournamentsHTML;
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            switch(status) {
+                case 'registration': return 'Registrierung offen';
+                case 'started': return 'Läuft';
+                case 'finished': return 'Beendet';
+                default: return 'Unbekannt';
+            }
+        }
+
+        // Register for tournament
+        async function registerForTournament(gameId, tournamentId) {
+            if (!currentUser) {
+                showMessage('Sie müssen sich zuerst anmelden.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        walletAddress: currentUser.walletAddress
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('Erfolgreich für das Turnier registriert!', 'success');
+                    await loadTournaments();
+                } else {
+                    const error = await response.json();
+                    showMessage('Fehler bei der Registrierung: ' + (error.error || 'Unbekannter Fehler'), 'error');
+                }
+            } catch (error) {
+                console.error('Error registering for tournament:', error);
+                showMessage('Netzwerkfehler bei der Registrierung.', 'error');
+            }
+        }
+
+        // Unregister from tournament
+        async function unregisterFromTournament(gameId, tournamentId) {
+            if (!currentUser) {
+                showMessage('Sie müssen sich zuerst anmelden.', 'error');
+                return;
+            }
+
+            if (!confirm('Möchten Sie sich wirklich von diesem Turnier abmelden?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/unregister`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        walletAddress: currentUser.walletAddress
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('Erfolgreich vom Turnier abgemeldet.', 'success');
+                    await loadTournaments();
+                } else {
+                    const error = await response.json();
+                    showMessage('Fehler bei der Abmeldung: ' + (error.error || 'Unbekannter Fehler'), 'error');
+                }
+            } catch (error) {
+                console.error('Error unregistering from tournament:', error);
+                showMessage('Netzwerkfehler bei der Abmeldung.', 'error');
+            }
+        }
+
+        // Check connection on load
+        async function checkConnection() {
+            if (isMetaMaskInstalled()) {
+                try {
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_accounts'
+                    });
+                    
+                    if (accounts.length > 0) {
+                        const walletAddress = accounts[0];
+                        const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                        
+                        if (response.ok) {
+                            currentUser = await response.json();
+                            updateUIAfterConnect();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking connection:', error);
+                }
+            }
+            
+            // Always load tournaments (even without connection)
+            await loadTournaments();
+        }
+
+        // Auto refresh tournaments every 30 seconds
+        function startAutoRefresh() {
+            setInterval(loadTournaments, 30000);
+        }
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            await checkConnection();
+            startAutoRefresh();
+        });
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    disconnect();
+                } else {
+                    location.reload();
+                }
+            });
+            
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
