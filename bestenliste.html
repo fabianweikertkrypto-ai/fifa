@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bestenliste - MSI Gaming Universe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating Particles Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(0, 255, 136, 0.3), transparent),
+                radial-gradient(1px 1px at 90px 40px, #00ccff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(0, 204, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 160px 30px, #00ff88, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Matrix-Style Code Rain Background */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -10;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.12;
+            filter: blur(0.3px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            background: linear-gradient(45deg, #ffffff, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #cccccc;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border: none;
+            color: #000;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            text-decoration: none;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            z-index: 10;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+        }
+
+        .back-button:hover::before {
+            left: 100%;
+        }
+
+        .msi-logo {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 120px;
+            height: auto;
+            animation: pulse 1.5s infinite;
+            filter: drop-shadow(0 0 25px rgba(0, 255, 136, 0.8));
+            z-index: 10;
+        }
+
+        .leaderboard-container {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #333;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .leaderboard-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        }
+
+        .section-title {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .game-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .game-selector label {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+
+        .game-dropdown {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: 2px solid #333;
+            border-radius: 25px;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: #ffffff;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .game-dropdown:focus {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            transform: scale(1.02);
+        }
+
+        .game-dropdown option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .leaderboard-table th {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: #00ff88;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #333;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #333;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-table tbody tr {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            transform: scale(1.01);
+        }
+
+        .rank-cell {
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+        }
+
+        .rank-1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+        .rank-2 { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.8); }
+        .rank-3 { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.8); }
+
+        .username-cell {
+            font-weight: bold;
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.6);
+        }
+
+        .wins-cell {
+            font-weight: bold;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+
+        .tournaments-cell {
+            color: #cccccc;
+            font-family: 'Courier New', monospace;
+        }
+
+        .wallet-cell {
+            font-family: 'Courier New', monospace;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00ff88;
+            font-size: 1.2rem;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #ff4757;
+            font-size: 1.1rem;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 20px;
+            border: 1px solid #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #cccccc;
+            font-size: 1.1rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .back-button, .msi-logo {
+                position: relative;
+                margin: 10px auto;
+                display: block;
+            }
+
+            .msi-logo {
+                width: 80px;
+                text-align: center;
+            }
+
+            .game-selector {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .leaderboard-table {
+                font-size: 0.85rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 8px 10px;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        /* Custom scrollbar */
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+        }
+		
+		
+        .leaderboard-container {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #333;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .leaderboard-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        }
+
+        .section-title {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .game-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .game-selector label {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+
+        .game-dropdown {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: 2px solid #333;
+            border-radius: 25px;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: #ffffff;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .game-dropdown:focus {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            transform: scale(1.02);
+        }
+
+        .game-dropdown option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .leaderboard-table th {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: #00ff88;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #333;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #333;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-table tbody tr {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            transform: scale(1.01);
+        }
+
+        .rank-cell {
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+        }
+
+        .rank-1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+        .rank-2 { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.8); }
+        .rank-3 { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.8); }
+
+        .username-cell {
+            font-weight: bold;
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.6);
+        }
+
+        .wins-cell {
+            font-weight: bold;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+
+        .tournaments-cell {
+            color: #cccccc;
+            font-family: 'Courier New', monospace;
+        }
+
+        .wallet-cell {
+            font-family: 'Courier New', monospace;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00ff88;
+            font-size: 1.2rem;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #ff4757;
+            font-size: 1.1rem;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 20px;
+            border: 1px solid #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #cccccc;
+            font-size: 1.1rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .back-button, .msi-logo {
+                position: relative;
+                margin: 10px auto;
+                display: block;
+            }
+
+            .msi-logo {
+                width: 80px;
+                text-align: center;
+            }
+
+            .game-selector {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .leaderboard-table {
+                font-size: 0.85rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 8px 10px;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        /* Custom scrollbar */
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    
+    <a href="index.html" class="back-button">← Zurück zur Hauptseite</a>
+    <img src="MSI.png" alt="MSI Logo" class="msi-logo">
+
+    <div class="container">
+        <div class="header">
+            <h1>Bestenliste</h1>
+            <p>Die besten Spieler im MSI Gaming Universe</p>
+        </div>
+
+        <!-- Gesamtsiege Sektion -->
+        <div class="leaderboard-container">
+            <div class="section-title">🏆 Gesamtsiege - Top Spieler</div>
+            
+            <div id="globalStats" class="stats-container">
+                <!-- Stats werden hier eingefügt -->
+            </div>
+
+            <div class="table-container">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Spielername</th>
+                            <th>Gesamtsiege</th>
+                            <th>Wallet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="globalLeaderboard">
+                        <tr><td colspan="4" class="loading">Lade globale Rangliste</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Spielspezifische Sektion -->
+        <div class="leaderboard-container">
+            <div class="section-title">🎮 Spielspezifische Rangliste</div>
+            
+            <div class="game-selector">
+                <label for="gameSelect">Spiel auswählen:</label>
+                <select id="gameSelect" class="game-dropdown">
+                    <option value="">Spiel wird geladen...</option>
+                </select>
+            </div>
+
+            <div id="gameStats" class="stats-container" style="display: none;">
+                <!-- Game-specific stats werden hier eingefügt -->
+            </div>
+
+            <div class="table-container">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Spielername</th>
+                            <th>Siege</th>
+                            <th>Turniere</th>
+                            <th>Wallet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gameLeaderboard">
+                        <tr><td colspan="5" class="no-data">Wähle ein Spiel aus der Liste</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let availableGames = [];
+        let currentGameData = null;
+
+        // Matrix Animation
+        const canvas = document.getElementById("matrixCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let letters = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        letters = letters.split("");
+
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(10, 10, 10, 0.08)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#00ff88";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // API Functions
+        async function loadGlobalLeaderboard() {
+            try {
+                console.log('Loading global leaderboard...');
+                const response = await fetch('/leaderboard?limit=50');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Global leaderboard data:', data);
+                renderGlobalLeaderboard(data);
+                updateGlobalStats(data);
+                
+            } catch (error) {
+                console.error('Fehler beim Laden der globalen Rangliste:', error);
+                document.getElementById('globalLeaderboard').innerHTML = 
+                    '<tr><td colspan="4" class="error">Fehler beim Laden der Rangliste: ' + error.message + '</td></tr>';
+            }
+        }
+
+        async function loadAvailableGames() {
+            try {
+                console.log('Loading available games...');
+                const response = await fetch('/games/available');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Available games:', data);
+                availableGames = data.games;
+                renderGameSelector();
+                
+            } catch (error) {
+                console.error('Fehler beim Laden der Spiele:', error);
+                document.getElementById('gameSelect').innerHTML = 
+                    '<option value="">Fehler beim Laden: ' + error.message + '</option>';
+            }
+        }
+
+        async function loadGameLeaderboard(gameId) {
+            if (!gameId) {
+                document.getElementById('gameLeaderboard').innerHTML = 
+                    '<tr><td colspan="5" class="no-data">Wähle ein Spiel aus der Liste</td></tr>';
+                document.getElementById('gameStats').style.display = 'none';
+                return;
+            }
+
+            try {
+                console.log('Loading game leaderboard for:', gameId);
+                document.getElementById('gameLeaderboard').innerHTML = 
+                    '<tr><td colspan="5" class="loading">Lade Rangliste</td></tr>';
+
+                const response = await fetch(`/leaderboard/${gameId}?limit=50`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Game leaderboard data:', data);
+                currentGameData = data;
+                renderGameLeaderboard(data);
+                updateGameStats(data);
+                
+            } catch (error) {
+                console.error('Fehler beim Laden der Spiel-Rangliste:', error);
+                document.getElementById('gameLeaderboard').innerHTML = 
+                    '<tr><td colspan="5" class="error">Fehler beim Laden der Rangliste: ' + error.message + '</td></tr>';
+                document.getElementById('gameStats').style.display = 'none';
+            }
+        }
+
+        // Render Functions
+        function renderGlobalLeaderboard(data) {
+            const tbody = document.getElementById('globalLeaderboard');
+            
+            if (!data.topPlayers || data.topPlayers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="no-data">Noch keine Spieler mit Siegen vorhanden</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.topPlayers.map(player => {
+                const rankClass = player.rank <= 3 ? `rank-${player.rank}` : '';
+                return `
+                    <tr>
+                        <td class="rank-cell ${rankClass}">#${player.rank}</td>
+                        <td class="username-cell">${player.platformUsername}</td>
+                        <td class="wins-cell">${player.totalWins}</td>
+                        <td class="wallet-cell">${player.walletAddress}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderGameLeaderboard(data) {
+            const tbody = document.getElementById('gameLeaderboard');
+            
+            if (!data.topPlayers || data.topPlayers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="no-data">Keine Spieler mit Siegen in ${data.gameName} gefunden</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.topPlayers.map(player => {
+                const rankClass = player.rank <= 3 ? `rank-${player.rank}` : '';
+                return `
+                    <tr>
+                        <td class="rank-cell ${rankClass}">#${player.rank}</td>
+                        <td class="username-cell">${player.platformUsername}</td>
+                        <td class="wins-cell">${player.wins}</td>
+                        <td class="tournaments-cell">${player.tournaments}</td>
+                        <td class="wallet-cell">${player.walletAddress}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderGameSelector() {
+            const select = document.getElementById('gameSelect');
+            select.innerHTML = '<option value="">Wähle ein Spiel...</option>' + 
+                availableGames.map(game => 
+                    `<option value="${game.id}">${game.name}</option>`
+                ).join('');
+        }
+
+        function updateGlobalStats(data) {
+            const statsContainer = document.getElementById('globalStats');
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${data.totalPlayers || 0}</div>
+                    <div class="stat-label">Registrierte Spieler</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.topPlayers ? data.topPlayers.length : 0}</div>
+                    <div class="stat-label">Spieler mit Siegen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.topPlayers && data.topPlayers.length > 0 ? Math.max(...data.topPlayers.map(p => p.totalWins)) : 0}</div>
+                    <div class="stat-label">Höchste Siegzahl</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${new Date(data.lastUpdated).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</div>
+                    <div class="stat-label">Letzte Aktualisierung</div>
+                </div>
+            `;
+        }
+
+        function updateGameStats(data) {
+            const statsContainer = document.getElementById('gameStats');
+            statsContainer.style.display = 'grid';
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${data.totalPlayers || 0}</div>
+                    <div class="stat-label">${data.gameName} Spieler</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.topPlayers ? data.topPlayers.length : 0}</div>
+                    <div class="stat-label">Mit Siegen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.topPlayers && data.topPlayers.length > 0 ? Math.max(...data.topPlayers.map(p => p.wins)) : 0}</div>
+                    <div class="stat-label">Höchste Siegzahl</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.topPlayers && data.topPlayers.length > 0 ? Math.max(...data.topPlayers.map(p => p.tournaments)) : 0}</div>
+                    <div class="stat-label">Meiste Turniere</div>
+                </div>
+            `;
+        }
+
+        // Event Listeners
+        document.getElementById('gameSelect').addEventListener('change', function() {
+            const selectedGameId = this.value;
+            loadGameLeaderboard(selectedGameId);
+        });
+
+        // Auto-refresh functions
+        function startAutoRefresh() {
+            // Refresh global leaderboard every 30 seconds
+            setInterval(() => {
+                loadGlobalLeaderboard();
+                
+                // Also refresh game-specific leaderboard if one is selected
+                const selectedGameId = document.getElementById('gameSelect').value;
+                if (selectedGameId) {
+                    loadGameLeaderboard(selectedGameId);
+                }
+            }, 30000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing...');
+            
+            // Load data immediately
+            Promise.all([
+                loadGlobalLeaderboard(),
+                loadAvailableGames()
+            ]).then(() => {
+                console.log('Initial data loaded successfully');
+                startAutoRefresh();
+            }).catch(error => {
+                console.error('Error during initialization:', error);
+                // Still start auto-refresh even if initial load fails
+                startAutoRefresh();
+            });
+        });
+
+        // Debug function to test server connectivity
+        window.testConnection = async function() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                console.log('Server health check:', data);
+                return data;
+            } catch (error) {
+                console.error('Server connection failed:', error);
+                return null;
+            }
+        };
+    </script>
+</body>
+</html>
