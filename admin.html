@@ -1100,7 +1100,7 @@
             const usersList = document.getElementById('usersList');
             
             try {
-                const response = await fetch('https://msi-38e5.onrender.com/users/global');
+                const response = await fetch('https://fifa-i528.onrender.com/users/global');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -1130,7 +1130,7 @@
             const gamesGrid = document.getElementById('gamesGrid');
             
             try {
-                const response = await fetch('https://msi-38e5.onrender.com/games');
+                const response = await fetch('https://fifa-i528.onrender.com/games');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -1376,7 +1376,7 @@
             }
             
             try {
-                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments`, {
+                const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1406,7 +1406,7 @@
             }
             
             try {
-                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/start`, {
+                const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}/start`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1430,7 +1430,7 @@
         // Bracket anzeigen
         async function showBracket(gameId, tournamentId) {
             try {
-                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
+                const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
                 
                 if (response.ok) {
                     const tournament = await response.json();
@@ -1565,7 +1565,7 @@
             }
             
             try {
-                const response = await fetch(`https://msi-38e5.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
+                const response = await fetch(`https://fifa-i528.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1761,7 +1761,7 @@ async function deleteTournament(gameId, tournamentId) {
     }
     
     try {
-        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}`, {
+        const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -1796,7 +1796,7 @@ async function resetTournament(gameId, tournamentId) {
     }
     
     try {
-        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/reset`, {
+        const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}/reset`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1868,7 +1868,7 @@ async function setMatchResultWithScore(matchId, score1, score2) {
     }
     
     try {
-        const response = await fetch(`https://msi-38e5.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
+        const response = await fetch(`https://fifa-i528.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -2032,7 +2032,7 @@ async function resetMatch(matchId) {
     }
     
     try {
-        const response = await fetch(`https://msi-38e5.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/reset`, {
+        const response = await fetch(`https://fifa-i528.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/reset`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -2066,7 +2066,7 @@ async function cancelTournament(gameId, tournamentId) {
     }
     
     try {
-        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/cancel`, {
+        const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}/cancel`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -2091,7 +2091,7 @@ async function cancelTournament(gameId, tournamentId) {
 const originalShowBracket = showBracket;
 async function showBracket(gameId, tournamentId) {
     try {
-        const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
+        const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
         
         if (response.ok) {
             const tournament = await response.json();

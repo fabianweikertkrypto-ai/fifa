@@ -834,7 +834,7 @@
                     const walletAddress = accounts[0];
                     
                     // Check if user is registered
-                    const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                    const response = await fetch(`https://fifa-i528.onrender.com/user/${walletAddress}`);
                     
                     if (response.ok) {
                         currentUser = await response.json();
@@ -885,7 +885,7 @@
             const tournamentsGrid = document.getElementById('tournamentsGrid');
             
             try {
-                const response = await fetch('https://msi-38e5.onrender.com/games');
+                const response = await fetch('https://fifa-i528.onrender.com/games');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -1084,7 +1084,7 @@
             }
 
             try {
-                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/register`, {
+                const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1119,7 +1119,7 @@
             }
 
             try {
-                const response = await fetch(`https://msi-38e5.onrender.com/games/${gameId}/tournaments/${tournamentId}/unregister`, {
+                const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}/unregister`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1152,7 +1152,7 @@
                     
                     if (accounts.length > 0) {
                         const walletAddress = accounts[0];
-                        const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                        const response = await fetch(`https://fifa-i528.onrender.com/user/${walletAddress}`);
                         
                         if (response.ok) {
                             currentUser = await response.json();
