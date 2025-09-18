@@ -1410,20 +1410,20 @@
     }
 
     initializeTournamentUI() {
-        const whitePlayerName = document.getElementById('whitePlayerName');
-        const blackPlayerName = document.getElementById('blackPlayerName');
-        
-        if (this.playerColor === 'white') {
-            whitePlayerName.textContent = 'Du';
-            blackPlayerName.textContent = this.matchData.player2.platformUsername || this.matchData.player2.username;
-        } else {
-            whitePlayerName.textContent = this.matchData.player1.platformUsername || this.matchData.player1.username;
-            blackPlayerName.textContent = 'Du';
-        }
-
-        this.timer.start();
-        this.updateGameStatus('Spiel läuft...');
+    const whitePlayerName = document.getElementById('whitePlayerName');
+    const blackPlayerName = document.getElementById('blackPlayerName');
+    
+    if (this.playerColor === 'white') {
+        whitePlayerName.textContent = 'Du';
+        blackPlayerName.textContent = this.matchData.player2.platformUsername || this.matchData.player2.username;
+    } else {
+        whitePlayerName.textContent = this.matchData.player1.platformUsername || this.matchData.player1.username;
+        blackPlayerName.textContent = 'Du';
     }
+
+    this.timer.start();
+    this.updateGameStatus('Spiel läuft...');
+}
 
     handleSquareClick(event) {
         if (!this.gameStarted || this.gameState !== 'playing') return;
@@ -1512,35 +1512,36 @@
     }
 
     async submitGameResult(winner) {
-        try {
-            const gameResult = {
-                matchId: this.matchData.id,
-                winner: winner,
-                gameData: {
-                    moves: this.moveHistory,
-                    duration: 600 - (winner === 'white' ? this.timer.whiteTime : this.timer.blackTime),
-                    endReason: this.gameState
-                }
-            };
+    try {
+        const gameResult = {
+            matchId: this.matchData.id,
+            winner: winner,
+            gameData: {
+                moves: this.moveHistory,
+                duration: 600 - (winner === 'white' ? this.timer.whiteTime : this.timer.blackTime),
+                endReason: this.gameState
+            },
+            walletAddress: currentUser.walletAddress
+        };
 
-            const response = await fetch(`https://msi-38e5.onrender.com/tournament/submit-game-result`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(gameResult)
-            });
+        const response = await fetch(`https://fifa-i528.onrender.com/games/chess/matches/${this.matchData.id}/result`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gameResult)
+        });
 
-            if (response.ok) {
-                this.showMessage('Spielergebnis erfolgreich übermittelt!', 'success');
-            } else {
-                this.showMessage('Fehler beim Übermitteln des Ergebnisses.', 'error');
-            }
-        } catch (error) {
-            console.error('Error submitting game result:', error);
-            this.showMessage('Netzwerkfehler beim Übermitteln des Ergebnisses.', 'error');
+        if (response.ok) {
+            this.showMessage('Spielergebnis erfolgreich übermittelt!', 'success');
+        } else {
+            this.showMessage('Fehler beim Übermitteln des Ergebnisses.', 'error');
         }
+    } catch (error) {
+        console.error('Error submitting game result:', error);
+        this.showMessage('Netzwerkfehler beim Übermitteln des Ergebnisses.', 'error');
     }
+}
 
     updateGameStatus(status) {
         const statusElement = document.getElementById('gameStatus');
@@ -1576,80 +1577,7 @@
         this.updateGameStatus('Spiel gestartet! Du spielst als ' + (this.playerColor === 'white' ? 'Weiß' : 'Schwarz'));
     }
 }
-
-            async submitGameResult(winner) {
-                try {
-                    const gameResult = {
-                        matchId: this.matchData.id,
-                        winner: winner,
-                        gameData: {
-                            moves: this.moveHistory,
-                            duration: 600 - (winner === 'white' ? this.timer.whiteTime : this.timer.blackTime),
-                            endReason: this.gameState
-                        }
-                    };
-
-                    // Submit to tournament system
-                    const response = await fetch(`https://msi-38e5.onrender.com/tournament/submit-game-result`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(gameResult)
-                    });
-
-                    if (response.ok) {
-                        this.showMessage('Spielergebnis erfolgreich übermittelt!', 'success');
-                    } else {
-                        this.showMessage('Fehler beim Übermitteln des Ergebnisses.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error submitting game result:', error);
-                    this.showMessage('Netzwerkfehler beim Übermitteln des Ergebnisses.', 'error');
-                }
-            }
-
-            updateGameStatus(status) {
-                const statusElement = document.getElementById('gameStatus');
-                if (statusElement) {
-                    statusElement.textContent = status;
-                }
-            }
-
-            showTemporaryMessage(message, duration = 3000) {
-                this.updateGameStatus(message);
-                setTimeout(() => {
-                    this.updateGameStatus(this.gameState === 'playing' ? 'Spiel läuft...' : this.gameState);
-                }, duration);
-            }
-
-            showMessage(text, type = 'info') {
-                const messageContainer = document.getElementById('messageContainer');
-                if (messageContainer) {
-                    messageContainer.textContent = text;
-                    messageContainer.className = `message visible ${type}`;
-                    
-                    setTimeout(() => {
-                        messageContainer.classList.remove('visible');
-                    }, 5000);
-                }
-            }
-
-            startNewGame() {
-                this.gameStarted = true;
-                this.reset();
-                this.timer.reset();
-                this.timer.start();
-                this.updateGameStatus('Spiel gestartet! Du spielst als ' + (this.playerColor === 'white' ? 'Weiß' : 'Schwarz'));
-            }
-        }
-
-        // Global variables
-        let currentUser = null;
-        let tournamentData = null;
-        let chessGame = null;
-        let gameTimer = null;
-        let currentMatch = null;
+        
 
         // Initialize page
         async function initializePage() {
@@ -1670,7 +1598,7 @@
                     
                     if (accounts.length > 0) {
                         const walletAddress = accounts[0];
-                        const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                        const response = await fetch(`https://fifa-i528.onrender.com/user/${walletAddress}`);
                         
                         if (response.ok) {
                             currentUser = await response.json();
@@ -1695,7 +1623,7 @@
 
         async function loadTournamentData() {
             try {
-                const response = await fetch('https://msi-38e5.onrender.com/games/chess/tournaments/active');
+                const response = await fetch('https://fifa-i528.onrender.com/games/chess/tournaments/active');
                 
                 if (response.ok) {
                     tournamentData = await response.json();
@@ -1711,20 +1639,20 @@
         }
 
         function findCurrentMatch() {
-            if (!currentUser || !tournamentData || !tournamentData.bracket) return;
+    if (!currentUser || !tournamentData || !tournamentData.bracket) return;
 
-            // Find current match for the user
-            for (const round of tournamentData.bracket.rounds) {
-                for (const match of round) {
-                    if (match.status === 'pending' && 
-                        (match.player1.walletAddress === currentUser.walletAddress || 
-                         match.player2.walletAddress === currentUser.walletAddress)) {
-                        currentMatch = match;
-                        return;
-                    }
-                }
+    // Find current match for the user
+    for (const round of tournamentData.bracket.rounds) {
+        for (const match of round) {
+            if (match.status === 'pending' && 
+                (match.player1.walletAddress.toLowerCase() === currentUser.walletAddress.toLowerCase() || 
+                 match.player2.walletAddress.toLowerCase() === currentUser.walletAddress.toLowerCase())) {
+                currentMatch = match;
+                return;
             }
         }
+    }
+}
 
         function updateTournamentInfo() {
             const titleElement = document.getElementById('tournamentTitle');
@@ -1750,20 +1678,20 @@
         }
 
         function startChessGame() {
-            if (!currentMatch) {
-                showMessage('Kein aktives Spiel gefunden.', 'error');
-                return;
-            }
+    if (!currentMatch) {
+        showMessage('Kein aktives Spiel gefunden.', 'error');
+        return;
+    }
 
-            const playerColor = currentMatch.player1.walletAddress === currentUser.walletAddress ? 'white' : 'black';
-            chessGame = new TournamentChessGame(currentMatch, playerColor);
-            
-            // Show game area
-            document.getElementById('chessGameArea').classList.add('active');
-            document.getElementById('tournamentInfo').style.display = 'none';
-            
-            chessGame.startNewGame();
-        }
+    const playerColor = currentMatch.player1.walletAddress.toLowerCase() === currentUser.walletAddress.toLowerCase() ? 'white' : 'black';
+    chessGame = new TournamentChessGame(currentMatch, playerColor);
+    
+    // Show game area
+    document.getElementById('chessGameArea').classList.add('active');
+    document.getElementById('tournamentInfo').style.display = 'none';
+    
+    chessGame.startNewGame();
+}
 
         function showBracket() {
             document.getElementById('chessGameArea').classList.remove('active');
@@ -1814,8 +1742,8 @@
                     </div>`;
                     
                     if (isMyMatch && !isCompleted) {
-                        html += `<button onclick="startChessGame()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: linear-gradient(45deg, #ffd700, #ffed4e); color: #0a0a0a; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Spiel starten</button>`;
-                    }
+    html += `<button onclick="startChessGame()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: linear-gradient(45deg, #ffd700, #ffed4e); color: #0a0a0a; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Spiel starten</button>`;
+}
                     
                     html += '</div>';
                 });
@@ -1883,7 +1811,7 @@
 
                 if (accounts.length > 0) {
                     const walletAddress = accounts[0];
-                    const response = await fetch(`https://msi-38e5.onrender.com/user/${walletAddress}`);
+                    const response = await fetch(`https://fifa-i528.onrender.com/user/${walletAddress}`);
                     
                     if (response.ok) {
                         currentUser = await response.json();

@@ -1032,6 +1032,7 @@
                         <option value="">-- Spiel wählen --</option>
                         <option value="fifa">FIFA</option>
                         <option value="cod">Call of Duty</option>
+						<option value="chess">Chess</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1225,7 +1226,7 @@
                     <div class="game-card">
                         <div class="game-header">
                             <div class="game-title">
-                                <span class="game-icon">${game.id === 'fifa' ? '⚽' : '🎯'}</span>
+                                <span class="game-icon">${game.id === 'fifa' ? '⚽' : game.id === 'cod' ? '🎯' : game.id === 'chess' ? '♟️' : '🎮'}</span>
                                 ${game.name}
                             </div>
                             <div class="tournament-count">${tournamentCount} Turniere</div>
@@ -1258,6 +1259,11 @@
                                                     📊 Bracket
                                                 </button>` : ''
                                             }
+											${game.id === 'chess' && tournament.status === 'started' ? `
+												<button class="action-btn" onclick="viewActiveChessMatches('${tournament.id}')">
+													♟️ Aktive Spiele
+												</button>
+												` : ''}
                                             <button class="action-btn" onclick="viewTournamentDetails('${game.id}', '${tournament.id}')">
                                                 👁️ Details
                                             </button>
@@ -1310,7 +1316,10 @@
                         <div class="user-info">
                             <h3>${user.platformUsername || user.username}</h3>
                             <p><strong>Registriert:</strong> ${formatDate(user.createdAt || user.registrationTime)}</p>
-                            <p><strong>Siege:</strong> ${user.stats?.totalWins || 0} | <strong>FIFA:</strong> ${user.stats?.gameStats?.fifa?.wins || 0} | <strong>COD:</strong> ${user.stats?.gameStats?.cod?.wins || 0}</p>
+                            <p><strong>Siege:</strong> ${user.stats?.totalWins || 0} | 
+								   <strong>FIFA:</strong> ${user.stats?.gameStats?.fifa?.wins || 0} | 
+								   <strong>COD:</strong> ${user.stats?.gameStats?.cod?.wins || 0} |
+								   <strong>Chess:</strong> ${user.stats?.gameStats?.chess?.wins || 0}</p>
                             ${user.gamertags ? `
                                 <p><strong>PlayStation:</strong> ${user.gamertags.playstation || 'Nicht gesetzt'} | 
                                    <strong>Xbox:</strong> ${user.gamertags.xbox || 'Nicht gesetzt'} | 
@@ -1398,34 +1407,108 @@
                 showMessage('Netzwerkfehler beim Erstellen des Turniers', 'error');
             }
         });
-
-        // Turnier starten
-        async function startTournament(gameId, tournamentId) {
-            if (!confirm('Turnier starten? Die Registrierung wird geschlossen und das Bracket erstellt.')) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}/start`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    showMessage('Turnier erfolgreich gestartet!', 'success');
-                    await loadGames();
-                } else {
-                    const error = await response.json();
-                    showMessage('Fehler beim Starten: ' + (error.error || 'Unbekannter Fehler'), 'error');
+function viewActiveChessMatches(tournamentId) {
+    const tournament = gamesData.chess.tournaments[tournamentId];
+    const activeMatches = [];
+    
+    if (tournament.bracket?.rounds) {
+        for (const round of tournament.bracket.rounds) {
+            for (const match of round) {
+                if (match.status === 'pending') {
+                    activeMatches.push({...match, roundName: getRoundName(tournament.bracket.rounds.indexOf(round) + 1, tournament.bracket.totalRounds)});
                 }
-            } catch (error) {
-                console.error('Error starting tournament:', error);
-                showMessage('Netzwerkfehler beim Starten des Turniers', 'error');
             }
         }
+    }
+    
+    if (activeMatches.length === 0) {
+        showMessage('Keine aktiven Schachspiele gefunden', 'info');
+        return;
+    }
+    
+    // Modal für aktive Chess-Matches
+    const modalHTML = `
+        <div class="modal" id="activeChessMatchesModal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Aktive Schachspiele (${activeMatches.length})</h3>
+                    <button class="close-btn" onclick="closeActiveChessMatchesModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    ${activeMatches.map(match => `
+                        <div class="tournament-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <strong>${match.player1.platformUsername}</strong> vs <strong>${match.player2.platformUsername}</strong>
+                                    <div style="font-size: 0.8rem; color: #888;">${match.roundName}</div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="action-btn" onclick="forceChessResult('${match.id}', '${match.player1.id}')">
+                                        Weiß gewinnt
+                                    </button>
+                                    <button class="action-btn" onclick="forceChessResult('${match.id}', '${match.player2.id}')">
+                                        Schwarz gewinnt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeActiveChessMatchesModal()">Schließen</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('activeChessMatchesModal').classList.add('visible');
+}
+
+function closeActiveChessMatchesModal() {
+    const modal = document.getElementById('activeChessMatchesModal');
+    if (modal) {
+        modal.classList.remove('visible');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+async function forceChessResult(matchId, winnerId) {
+    if (!confirm('Dieses Schachspiel als beendet markieren?')) {
+        return;
+    }
+    
+    const targetMatch = findMatchById(matchId);
+    const winner = winnerId === targetMatch.player1.id ? 'white' : 'black';
+    
+    try {
+        const response = await fetch(`https://fifa-i528.onrender.com/games/chess/matches/${matchId}/result`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                winner: winner,
+                gameData: {
+                    moves: [],
+                    duration: 0,
+                    endReason: 'admin_decision'
+                },
+                walletAddress: 'admin'
+            })
+        });
+        
+        if (response.ok) {
+            showMessage('Schachspiel erfolgreich beendet!', 'success');
+            closeActiveChessMatchesModal();
+            await loadGames();
+        } else {
+            showMessage('Fehler beim Beenden des Spiels', 'error');
+        }
+    } catch (error) {
+        showMessage('Netzwerkfehler', 'error');
+    }
+}
 
         // Bracket anzeigen
         async function showBracket(gameId, tournamentId) {
@@ -1435,7 +1518,7 @@
                 if (response.ok) {
                     const tournament = await response.json();
                     currentBracketData = { gameId, tournamentId, tournament };
-                    displayBracket(tournament);
+                    displayBracketWithAdminControls(tournament);
                     document.getElementById('bracketTournamentName').textContent = tournament.name;
                     document.getElementById('bracketSection').classList.add('visible');
                     document.getElementById('bracketSection').scrollIntoView({ behavior: 'smooth' });
@@ -1555,42 +1638,70 @@
 
         // Match-Gewinner setzen
         async function setMatchWinner(matchId, winnerId) {
-            if (!confirm('Sind Sie sicher, dass dieser Spieler gewonnen hat?')) {
-                return;
-            }
+    if (!confirm('Sind Sie sicher, dass dieser Spieler gewonnen hat?')) {
+        return;
+    }
+    
+    if (!currentBracketData) {
+        showMessage('Bracket-Daten nicht verfügbar', 'error');
+        return;
+    }
+    
+    try {
+        let response;
+        
+        if (currentBracketData.gameId === 'chess') {
+            // Chess-spezifische API
+            const targetMatch = findMatchById(matchId);
+            const winner = winnerId === targetMatch.player1.id ? 'white' : 'black';
             
-            if (!currentBracketData) {
-                showMessage('Bracket-Daten nicht verfügbar', 'error');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`https://fifa-i528.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+            response = await fetch(`https://fifa-i528.onrender.com/games/chess/matches/${matchId}/result`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    winner: winner,
+                    gameData: {
+                        moves: [],
+                        duration: 0,
+                        endReason: 'admin_decision'
                     },
-                    body: JSON.stringify({ winnerId: winnerId })
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    showMessage('Match-Ergebnis erfolgreich eingetragen!', 'success');
-                    
-                    // Bracket aktualisieren
-                    await showBracket(currentBracketData.gameId, currentBracketData.tournamentId);
-                    
-                    // Spiele-Liste aktualisieren
-                    await loadGames();
-                } else {
-                    const error = await response.json();
-                    showMessage('Fehler: ' + (error.error || 'Unbekannter Fehler'), 'error');
-                }
-            } catch (error) {
-                console.error('Error setting match winner:', error);
-                showMessage('Netzwerkfehler beim Eintragen des Ergebnisses', 'error');
-            }
+                    walletAddress: 'admin'
+                })
+            });
+        } else {
+            // FIFA/COD API
+            response = await fetch(`https://fifa-i528.onrender.com/games/${currentBracketData.gameId}/tournaments/${currentBracketData.tournamentId}/matches/${matchId}/result`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ winnerId: winnerId })
+            });
         }
+        
+        if (response.ok) {
+            showMessage('Match-Ergebnis erfolgreich eingetragen!', 'success');
+            await showBracket(currentBracketData.gameId, currentBracketData.tournamentId);
+            await loadGames();
+        } else {
+            const error = await response.json();
+            showMessage('Fehler: ' + (error.error || 'Unbekannter Fehler'), 'error');
+        }
+    } catch (error) {
+        console.error('Error setting match winner:', error);
+        showMessage('Netzwerkfehler beim Eintragen des Ergebnisses', 'error');
+    }
+}
+
+function findMatchById(matchId) {
+    for (const round of currentBracketData.tournament.bracket.rounds) {
+        const match = round.find(m => m.id === matchId);
+        if (match) return match;
+    }
+    return null;
+}
 
         // Turnier-Details anzeigen
         function viewTournamentDetails(gameId, tournamentId) {
@@ -1968,6 +2079,10 @@ function displayBracketWithAdminControls(tournament) {
                             </button>
                         ` : ''}
                     </div>
+				
+					${currentBracketData.tournament.gameId === 'chess' && isCompleted && match.gameData ? 
+						displayChessMatchDetails(match) : ''
+					}
                     
                     ${match.pendingResults && match.pendingResults.length > 0 ? 
                         `<div style="text-align: center; color: ${match.pendingResults.some(r => r.conflict) ? '#ff6363' : '#f59e0b'}; font-size: 0.8rem; margin-top: 0.5rem;">
@@ -2088,7 +2203,6 @@ async function cancelTournament(gameId, tournamentId) {
 }
 
 // Update der showBracket Funktion um Admin-Kontrollen zu verwenden
-const originalShowBracket = showBracket;
 async function showBracket(gameId, tournamentId) {
     try {
         const response = await fetch(`https://fifa-i528.onrender.com/games/${gameId}/tournaments/${tournamentId}`);
@@ -2112,6 +2226,27 @@ async function showBracket(gameId, tournamentId) {
 // Update der viewTournamentDetails Funktion
 function viewTournamentDetails(gameId, tournamentId) {
     openTournamentDetailsModal(gameId, tournamentId);
+}
+
+function displayChessMatchDetails(match) {
+    let details = '';
+    if (match.gameData) {
+        details = `
+            <div style="font-size: 0.8rem; color: #888; margin-top: 0.5rem;">
+                Züge: ${match.gameData.moves?.length || 0} | 
+                Dauer: ${formatDuration(match.gameData.duration)} |
+                Ende: ${match.gameData.endReason || 'Normal'}
+            </div>
+        `;
+    }
+    return details;
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return 'Unbekannt';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
 // Zusätzliche Utility-Funktionen für bessere UX

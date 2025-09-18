@@ -50,7 +50,13 @@ async function readGames() {
                     name: 'Call of Duty',
                     tournaments: {},
                     activeTournamentId: null
-                }
+                },
+				chess: {
+					id: 'chess',
+					name: 'Chess',
+					tournaments: {},
+					activeTournamentId: null
+				}
             }
         };
     }
@@ -175,7 +181,8 @@ app.post('/user/register', async (req, res) => {
                     totalWins: 0,
                     gameStats: {
                         fifa: { tournaments: 0, wins: 0 },
-                        cod: { tournaments: 0, wins: 0 }
+                        cod: { tournaments: 0, wins: 0 },
+						chess: { tournaments: 0, wins: 0 }
                     }
                 },
                 createdAt: now,
@@ -431,6 +438,82 @@ app.get('/games/available', async (req, res) => {
         res.json({ games: availableGames });
     } catch (error) {
         console.error('Fehler beim Laden der verfügbaren Spiele:', error);
+        res.status(500).json({ error: 'Interner Serverfehler' });
+    }
+});
+
+// Get active chess tournament
+app.get('/games/chess/tournaments/active', async (req, res) => {
+    try {
+        const gamesData = await readGames();
+        const chessGame = gamesData.games.chess;
+        
+        if (!chessGame || !chessGame.tournaments) {
+            return res.status(404).json({ error: 'Keine Chess-Turniere gefunden' });
+        }
+        
+        // Find active tournament (started status)
+        const activeTournament = Object.values(chessGame.tournaments)
+            .find(t => t.status === 'started');
+        
+        if (activeTournament) {
+            res.json(activeTournament);
+        } else {
+            res.status(404).json({ error: 'Kein aktives Chess-Turnier gefunden' });
+        }
+    } catch (error) {
+        console.error('Error loading active chess tournament:', error);
+        res.status(500).json({ error: 'Interner Serverfehler' });
+    }
+});
+
+app.post('/games/chess/matches/:matchId/result', async (req, res) => {
+    try {
+        const { matchId } = req.params;
+        const { winner, gameData, walletAddress } = req.body;
+        
+        const gamesData = await readGames();
+        let targetMatch = null;
+        let tournamentId = null;
+        
+        // Find the match in active chess tournaments
+        for (const [tId, tournament] of Object.entries(gamesData.games.chess.tournaments)) {
+            if (tournament.bracket && tournament.bracket.rounds) {
+                for (const round of tournament.bracket.rounds) {
+                    const match = round.find(m => m.id === matchId);
+                    if (match) {
+                        targetMatch = match;
+                        tournamentId = tId;
+                        break;
+                    }
+                }
+            }
+            if (targetMatch) break;
+        }
+        
+        if (!targetMatch) {
+            return res.status(404).json({ error: 'Match nicht gefunden' });
+        }
+        
+        // Determine winner player object
+        const winnerPlayer = winner === 'white' ? targetMatch.player1 : targetMatch.player2;
+        
+        // Update match
+        targetMatch.winner = winnerPlayer;
+        targetMatch.status = 'completed';
+        targetMatch.completedAt = new Date().toISOString();
+        targetMatch.gameData = gameData;
+        
+        // Check if tournament advances
+        await checkAndAdvanceRound(gamesData, 'chess', tournamentId, 
+            gamesData.games.chess.tournaments[tournamentId].bracket.currentRound - 1);
+        
+        await writeGames(gamesData);
+        
+        res.json({ message: 'Chess-Spielergebnis erfolgreich übermittelt' });
+        
+    } catch (error) {
+        console.error('Error submitting chess result:', error);
         res.status(500).json({ error: 'Interner Serverfehler' });
     }
 });

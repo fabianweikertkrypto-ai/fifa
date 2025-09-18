@@ -682,6 +682,13 @@
                 icon: "FIFA.png",
                 status: "available"
             },
+			{
+				title: "Chess Tournament",
+				genre: "strategy",
+				description: "Strategische Schachpartien gegen andere Spieler",
+				icon: "chess.png",
+				status: "available"
+			},
             {
                 title: "Call Of Duty: BO6",
                 genre: "strategy",
@@ -823,6 +830,11 @@
     // Check if it's FIFA 2025 - redirect to the tournament site
     if (gameTitle === "Fifa 2025") {
         window.location.href = "registration.html";
+        return;
+    }
+	
+	 if (gameTitle === "Chess Tournament") {
+        window.location.href = "SchachTest.html";
         return;
     }
     
